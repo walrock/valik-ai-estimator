@@ -1,0 +1,14 @@
+node_modules/
+
+.env
+.env.*
+!.env.example
+
+data/*.sqlite
+data/*.sqlite-*
+data/backups/
+data/sessions.json
+data/crm-outbox.json
+
+npm-debug.log*
+*.log

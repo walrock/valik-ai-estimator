@@ -1,0 +1,26 @@
+{
+  "name": "valik-ai-estimator",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "test": "node --test --experimental-test-isolation=none",
+    "start": "node server/app.js",
+    "demo": "node index.js",
+    "preflight": "node scripts/preflight.js",
+    "backup:db": "node scripts/backup-sqlite.js",
+    "smoke:staging": "node scripts/staging-smoke.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "openai": "^6.25.0",
+    "zod": "^4.3.6"
+  }
+}

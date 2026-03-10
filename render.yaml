@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: valik-ai-estimator-api
+    env: node
+    region: frankfurt
+    plan: starter
+    autoDeploy: true
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    disk:
+      name: sqlite-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: 22.18.0
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_PATH
+        value: /opt/render/project/src/data/app.sqlite
+      - key: BACKUP_DIR
+        value: /opt/render/project/src/data/backups
+      - key: LOG_LEVEL
+        value: info
+      - key: METRICS_PREFIX
+        value: valik
+      - key: OUTBOX_PROCESS_INTERVAL_MS
+        value: "15000"
+      - key: OUTBOX_MAX_ATTEMPTS
+        value: "6"
+      - key: OUTBOX_BACKOFF_BASE_MS
+        value: "30000"
+      - key: OUTBOX_BACKOFF_MAX_MS
+        value: "3600000"

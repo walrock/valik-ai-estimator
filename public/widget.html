@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Valik AI Estimator Widget</title>
+    <link rel="stylesheet" href="/widget.css" />
+  </head>
+  <body>
+    <main class="widget">
+      <header class="widget__header">
+        <h1>Valik AI Estimator</h1>
+        <p>Describe project needs and the agent will prepare an estimate draft.</p>
+      </header>
+
+      <section class="widget__status" id="status">
+        <strong>Status:</strong> Waiting for first message
+      </section>
+
+      <section class="widget__messages" id="messages"></section>
+
+      <section class="widget__estimate" id="estimate"></section>
+
+      <form id="chatForm" class="widget__form">
+        <textarea
+          id="messageInput"
+          name="message"
+          rows="3"
+          placeholder="Example: Bathroom 6m2, remove tile without lift, tile 60x60..."
+          required
+        ></textarea>
+        <div class="widget__actions">
+          <button type="submit" id="sendBtn">Send</button>
+          <button type="button" id="confirmBtn" disabled>Confirm estimate</button>
+        </div>
+      </form>
+
+      <section class="widget__crm" id="crmResult"></section>
+    </main>
+
+    <script type="module" src="/widget.js"></script>
+  </body>
+</html>
