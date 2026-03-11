@@ -23,7 +23,8 @@ const confirmBtn = document.getElementById("confirmBtn");
 function appendMessage(text, role) {
   const item = document.createElement("div");
   item.className = `msg msg--${role}`;
-  item.textContent = text;
+  item.textContent =
+    role === "assistant" ? normalizeAssistantMessage(text) : String(text ?? "");
   messagesEl.appendChild(item);
 }
 
@@ -32,10 +33,30 @@ function setStatus(status) {
   statusEl.innerHTML = `<strong>Status:</strong> ${label}`;
 }
 
+function normalizeAssistantMessage(text) {
+  const raw = String(text ?? "");
+  if (!raw) {
+    return raw;
+  }
+
+  const withBullets = raw.replace(/\s*•\s*/g, "\n- ");
+  const inlineHyphenCount = (withBullets.match(/\s-\s/g) ?? []).length;
+  if (inlineHyphenCount >= 2 && !withBullets.includes("\n- ")) {
+    return withBullets.replace(/\s-\s/g, "\n- ");
+  }
+
+  return withBullets;
+}
+
 function renderEstimate(payload) {
   const estimate = payload?.estimate;
-  if (!estimate) {
-    estimateEl.innerHTML = "<strong>Wycena:</strong> jeszcze niegotowa";
+  const status = String(payload?.status ?? state.status ?? "");
+  const isFinalizable =
+    status === "ready_for_confirmation" || status === "confirmed";
+
+  if (!estimate || !isFinalizable) {
+    estimateEl.innerHTML =
+      "<strong>Wycena:</strong> pojawi sie po uzupelnieniu kluczowych informacji";
     return;
   }
 
@@ -173,5 +194,6 @@ chatForm.addEventListener("submit", async (event) => {
 confirmBtn.addEventListener("click", handleConfirm);
 
 setStatus("active");
-estimateEl.innerHTML = "<strong>Wycena:</strong> jeszcze niegotowa";
+estimateEl.innerHTML =
+  "<strong>Wycena:</strong> pojawi sie po uzupelnieniu kluczowych informacji";
 crmResultEl.innerHTML = "<strong>CRM DTO:</strong> dostepne po potwierdzeniu";

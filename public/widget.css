@@ -81,6 +81,7 @@ body {
   border-radius: 14px;
   line-height: 1.45;
   border: 1px solid var(--line);
+  white-space: pre-line;
 }
 
 .msg--user {
