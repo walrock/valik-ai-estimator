@@ -217,6 +217,21 @@ test("API serves widget static page", async () => {
   }
 });
 
+test("API serves embed script", async () => {
+  const runtime = await buildTestApp();
+
+  try {
+    const response = await fetch(`${runtime.baseUrl}/embed.js`);
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get("content-type") ?? "", /application\/javascript/);
+
+    const script = await response.text();
+    assert.ok(script.includes("initValikEstimatorEmbed"));
+  } finally {
+    await runtime.cleanup();
+  }
+});
+
 test("API confirm is idempotent and does not duplicate CRM delivery", async () => {
   const runtime = await buildTestApp();
 

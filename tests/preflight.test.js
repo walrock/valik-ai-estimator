@@ -62,3 +62,22 @@ test("preflight passes with strict security settings", async () => {
   assert.equal(report.ok, true);
   assert.equal(report.errors.length, 0);
 });
+
+test("preflight warns when public chat routes are enabled", async () => {
+  const report = await evaluateRuntimeConfig({
+    env: {
+      OPENAI_API_KEY: "test-key",
+      DATABASE_PATH: "./data/app.sqlite",
+      API_AUTH_KEY: "api-key",
+      ADMIN_API_KEY: "admin-key",
+      METRICS_API_KEY: "metrics-key",
+      CORS_ALLOWLIST: "https://example.com",
+      PUBLIC_CHAT_ROUTES: "true",
+      OUTBOX_MAX_ATTEMPTS: "6",
+    },
+    checkDatabaseAccess: false,
+  });
+
+  assert.equal(report.ok, true);
+  assert.ok(report.warnings.some((item) => item.includes("PUBLIC_CHAT_ROUTES")));
+});

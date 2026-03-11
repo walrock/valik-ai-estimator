@@ -73,6 +73,39 @@ test("security: API key is required when configured", async () => {
   }
 });
 
+test("security: public chat routes bypass API key but service routes stay protected", async () => {
+  const runtime = await buildSecurityApp({
+    apiKey: "test-key",
+    publicChatRoutes: true,
+  });
+
+  try {
+    let response = await fetch(`${runtime.baseUrl}/api/chat/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    assert.equal(response.status, 200);
+    const payload = await response.json();
+    assert.ok(payload.sessionId);
+
+    response = await fetch(`${runtime.baseUrl}/api/estimate/${payload.sessionId}`);
+    assert.equal(response.status, 200);
+
+    response = await fetch(`${runtime.baseUrl}/api/integrations/crm/outbox?limit=10`);
+    assert.equal(response.status, 401);
+
+    response = await fetch(`${runtime.baseUrl}/api/integrations/crm/outbox?limit=10`, {
+      headers: {
+        "X-API-Key": "test-key",
+      },
+    });
+    assert.equal(response.status, 200);
+  } finally {
+    await runtime.cleanup();
+  }
+});
+
 test("security: CORS allowlist blocks unknown origin", async () => {
   const runtime = await buildSecurityApp({
     apiKey: "test-key",

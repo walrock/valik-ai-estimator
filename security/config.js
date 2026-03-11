@@ -7,6 +7,22 @@ function parseNumber(value, fallback) {
   return parsed;
 }
 
+function parseBoolean(value, fallback = false) {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (["1", "true", "yes", "y", "on"].includes(normalized)) {
+    return true;
+  }
+  if (["0", "false", "no", "n", "off"].includes(normalized)) {
+    return false;
+  }
+
+  return fallback;
+}
+
 function normalizeOrigin(value) {
   try {
     return new URL(value).origin;
@@ -46,6 +62,9 @@ export function buildSecurityConfig(overrides = {}) {
     apiKey: overrides.apiKey ?? env.API_AUTH_KEY ?? null,
     adminApiKey: overrides.adminApiKey ?? env.ADMIN_API_KEY ?? null,
     metricsApiKey: overrides.metricsApiKey ?? env.METRICS_API_KEY ?? null,
+    publicChatRoutes:
+      overrides.publicChatRoutes ??
+      parseBoolean(env.PUBLIC_CHAT_ROUTES ?? env.PUBLIC_WIDGET_MODE ?? "false"),
     metricsIpAllowlist:
       overrides.metricsIpAllowlist ??
       parseIpAllowlist(env.METRICS_IP_ALLOWLIST ?? ""),

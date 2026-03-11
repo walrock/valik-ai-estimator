@@ -25,6 +25,8 @@ services:
         value: info
       - key: METRICS_PREFIX
         value: valik
+      - key: PUBLIC_CHAT_ROUTES
+        value: "false"
       - key: OUTBOX_PROCESS_INTERVAL_MS
         value: "15000"
       - key: OUTBOX_MAX_ATTEMPTS

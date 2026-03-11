@@ -10,6 +10,22 @@ function parsePositiveInt(value) {
   return Math.floor(parsed);
 }
 
+function parseBoolean(value, fallback = false) {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (["1", "true", "yes", "y", "on"].includes(normalized)) {
+    return true;
+  }
+  if (["0", "false", "no", "n", "off"].includes(normalized)) {
+    return false;
+  }
+
+  return fallback;
+}
+
 function parseCsv(rawValue) {
   if (!rawValue) {
     return [];
@@ -53,6 +69,9 @@ export async function evaluateRuntimeConfig({
   const errors = [];
   const warnings = [];
   const notes = [];
+  const publicChatRoutes = parseBoolean(
+    env.PUBLIC_CHAT_ROUTES ?? env.PUBLIC_WIDGET_MODE ?? false,
+  );
 
   if (!String(env.OPENAI_API_KEY ?? "").trim()) {
     errors.push("OPENAI_API_KEY is required for createDefaultApp().");
@@ -69,7 +88,17 @@ export async function evaluateRuntimeConfig({
   }
 
   if (!String(env.API_AUTH_KEY ?? "").trim()) {
-    warnings.push("API_AUTH_KEY is not set. Public API routes are unprotected.");
+    if (publicChatRoutes) {
+      warnings.push(
+        "API_AUTH_KEY is not set and PUBLIC_CHAT_ROUTES is enabled. Public API routes are unprotected.",
+      );
+    } else {
+      warnings.push("API_AUTH_KEY is not set. Public API routes are unprotected.");
+    }
+  } else if (publicChatRoutes) {
+    warnings.push(
+      "PUBLIC_CHAT_ROUTES is enabled. Chat and estimate endpoints are accessible without API_AUTH_KEY.",
+    );
   }
 
   if (!String(env.ADMIN_API_KEY ?? "").trim()) {

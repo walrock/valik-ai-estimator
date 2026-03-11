@@ -37,6 +37,7 @@ In Render service -> `Environment`, set secrets:
 - `API_AUTH_KEY` (recommended for API protection)
 - `ADMIN_API_KEY` (recommended for outbox admin endpoints)
 - `METRICS_API_KEY` (recommended for `/metrics`)
+- `PUBLIC_CHAT_ROUTES` (`true` for public website widget mode)
 - `CORS_ALLOWLIST` (recommended, include your WordPress domain)
 
 Optional integrations:
@@ -106,3 +107,24 @@ npm run smoke:staging
 ```
 
 Expected: `Staging smoke status: OK`.
+
+## 8. Embed on WordPress page
+
+The easiest way is embedding the widget via `iframe` script loader.
+
+1. In WordPress editor, add a `Custom HTML` block.
+2. Paste:
+
+```html
+<script
+  src="https://api.pomorskie-malowania.pl/embed.js"
+  data-height="820"
+  data-max-width="980px"
+  data-title="Kalkulator wyceny"
+></script>
+```
+
+Important:
+- Recommended for public website: keep `API_AUTH_KEY` enabled and set `PUBLIC_CHAT_ROUTES=true`.
+  This opens only chat/estimate endpoints for visitors and keeps service/admin endpoints protected.
+- Keep `ADMIN_API_KEY` and `METRICS_API_KEY` enabled.

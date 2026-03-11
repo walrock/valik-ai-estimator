@@ -23,6 +23,7 @@ const DEFAULT_INITIAL_FIELDS = ["work_scope", "area_or_quantity", "deadline", "c
 const PUBLIC_DIR = path.join(process.cwd(), "public");
 const STATIC_ROUTES = Object.freeze({
   "/": { file: "widget.html", type: "text/html; charset=utf-8" },
+  "/embed.js": { file: "embed.js", type: "application/javascript; charset=utf-8" },
   "/widget.js": { file: "widget.js", type: "application/javascript; charset=utf-8" },
   "/widget.css": { file: "widget.css", type: "text/css; charset=utf-8" },
 });
@@ -63,6 +64,19 @@ class HttpError extends Error {
 
 function isApiRoute(pathname) {
   return pathname === "/api" || pathname.startsWith("/api/");
+}
+
+function isPublicChatRoute(method, pathname) {
+  if (
+    method === "POST" &&
+    (pathname === "/api/chat/start" ||
+      pathname === "/api/chat/message" ||
+      pathname === "/api/estimate/confirm")
+  ) {
+    return true;
+  }
+
+  return method === "GET" && /^\/api\/estimate\/[^/]+$/.test(pathname);
 }
 
 function isOutboxAdminRoute(pathname) {
@@ -330,8 +344,12 @@ export function createHttpApp({
     }
   }
 
-  function enforceApiKey(req, pathname) {
+  function enforceApiKey(req, pathname, method) {
     if (!isApiRoute(pathname) || !securityConfig.apiKey) {
+      return;
+    }
+
+    if (securityConfig.publicChatRoutes && isPublicChatRoute(method, pathname)) {
       return;
     }
 
@@ -482,7 +500,7 @@ export function createHttpApp({
         }
       }
 
-      enforceApiKey(req, pathname);
+      enforceApiKey(req, pathname, method);
       enforceAdminApiKey(req, pathname);
       enforceMetricsAccess(req, pathname);
       const rateLimitState = enforceRateLimit(req, pathname);

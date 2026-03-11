@@ -19,6 +19,7 @@ Security hardening recommended:
 - `ADMIN_API_KEY`
 - `METRICS_API_KEY` and/or `METRICS_IP_ALLOWLIST`
 - `CORS_ALLOWLIST`
+- `PUBLIC_CHAT_ROUTES=true` if widget must work from browser without exposing API key
 
 CRM integration:
 
