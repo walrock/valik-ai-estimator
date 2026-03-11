@@ -10,7 +10,7 @@
   const parsedHeight = Number.parseInt(script.dataset.height ?? "", 10);
   const height = Number.isFinite(parsedHeight) && parsedHeight >= 320 ? parsedHeight : 760;
   const maxWidth = script.dataset.maxWidth || "980px";
-  const title = script.dataset.title || "Valik AI Estimator";
+  const title = script.dataset.title || "Kalkulator wyceny";
 
   const container = document.createElement("div");
   container.style.width = "100%";
@@ -24,9 +24,9 @@
   iframe.referrerPolicy = "strict-origin-when-cross-origin";
   iframe.style.width = "100%";
   iframe.style.minHeight = `${height}px`;
-  iframe.style.border = "0";
-  iframe.style.borderRadius = "12px";
-  iframe.style.boxShadow = "0 12px 28px rgba(2, 16, 39, 0.15)";
+  iframe.style.border = "1px solid rgba(30, 43, 44, 0.14)";
+  iframe.style.borderRadius = "26px";
+  iframe.style.boxShadow = "0 14px 40px rgba(30, 43, 44, 0.12)";
 
   container.appendChild(iframe);
   script.parentNode?.insertBefore(container, script.nextSibling);

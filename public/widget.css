@@ -1,7 +1,21 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700;800&display=swap");
+
 :root {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: #1f2937;
-  background: linear-gradient(160deg, #eef6ff 0%, #ffffff 55%, #f3f8f0 100%);
+  --bg: #f3f1ea;
+  --surface: #e7efea;
+  --sea: #2f6f73;
+  --ink: #1e2b2c;
+  --accent: #c77b5a;
+  --line: rgba(30, 43, 44, 0.14);
+  --shadow: 0 14px 40px rgba(30, 43, 44, 0.12);
+  --shadow2: 0 10px 26px rgba(30, 43, 44, 0.1);
+  --r-xl: 26px;
+  --r-lg: 20px;
+  --r-md: 16px;
+
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+    sans-serif;
+  color: var(--ink);
 }
 
 * {
@@ -12,70 +26,76 @@ body {
   margin: 0;
   min-height: 100vh;
   padding: 24px;
+  background: var(--bg);
 }
 
 .widget {
-  max-width: 900px;
+  max-width: 980px;
   margin: 0 auto;
-  background: #ffffffcc;
-  border: 1px solid #d1d5db;
-  border-radius: 14px;
   padding: 20px;
-  box-shadow: 0 16px 38px rgba(2, 16, 39, 0.08);
-  backdrop-filter: blur(2px);
+  border-radius: var(--r-xl);
+  border: 1px solid var(--line);
+  background: rgba(243, 241, 234, 0.78);
+  box-shadow: 0 8px 20px rgba(30, 43, 44, 0.08);
 }
 
 .widget__header h1 {
   margin: 0 0 8px;
-  font-size: 1.5rem;
+  font-family: "DM Serif Display", serif;
+  font-size: clamp(28px, 3.5vw, 42px);
+  line-height: 1.06;
+  letter-spacing: 0.2px;
 }
 
 .widget__header p {
   margin: 0 0 16px;
-  color: #4b5563;
+  color: rgba(30, 43, 44, 0.72);
+}
+
+.widget__status,
+.widget__messages,
+.widget__estimate,
+.widget__crm {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
 }
 
 .widget__status {
-  padding: 10px 12px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
+  padding: 12px 14px;
+  background: rgba(231, 239, 234, 0.72);
 }
 
 .widget__messages {
   margin-top: 12px;
   padding: 12px;
-  min-height: 160px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #fdfdfd;
+  min-height: 200px;
+  max-height: 420px;
+  overflow: auto;
+  background: rgba(243, 241, 234, 0.72);
   display: grid;
   gap: 8px;
 }
 
 .msg {
-  padding: 10px;
-  border-radius: 8px;
-  line-height: 1.4;
+  padding: 10px 12px;
+  border-radius: 14px;
+  line-height: 1.45;
+  border: 1px solid var(--line);
 }
 
 .msg--user {
-  background: #e6f4ff;
-  border: 1px solid #bfdbfe;
+  background: rgba(47, 111, 115, 0.12);
 }
 
 .msg--assistant {
-  background: #eef7ed;
-  border: 1px solid #cce5c8;
+  background: rgba(243, 241, 234, 0.86);
 }
 
 .widget__estimate,
 .widget__crm {
   margin-top: 12px;
   padding: 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #ffffff;
+  background: rgba(231, 239, 234, 0.55);
 }
 
 .widget__estimate ul,
@@ -92,11 +112,20 @@ body {
 
 textarea {
   width: 100%;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  padding: 10px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: rgba(243, 241, 234, 0.72);
+  color: var(--ink);
+  padding: 12px;
   font: inherit;
   resize: vertical;
+  min-height: 92px;
+}
+
+textarea:focus-visible,
+button:focus-visible {
+  outline: 3px solid rgba(47, 111, 115, 0.28);
+  outline-offset: 2px;
 }
 
 .widget__actions {
@@ -106,16 +135,41 @@ textarea {
 }
 
 button {
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
   padding: 10px 14px;
-  background: #ffffff;
+  background: rgba(243, 241, 234, 0.6);
+  color: rgba(30, 43, 44, 0.9);
   cursor: pointer;
   font: inherit;
+  font-weight: 700;
+  transition: transform 0.08s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-button:hover:not(:disabled) {
-  background: #f8fafc;
+#sendBtn {
+  background: linear-gradient(
+    135deg,
+    rgba(47, 111, 115, 0.22),
+    rgba(47, 111, 115, 0.12)
+  );
+  border-color: rgba(47, 111, 115, 0.28);
+  box-shadow: var(--shadow2);
+}
+
+#sendBtn:hover:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    rgba(47, 111, 115, 0.28),
+    rgba(199, 123, 90, 0.14)
+  );
+}
+
+#confirmBtn:hover:not(:disabled) {
+  background: rgba(47, 111, 115, 0.1);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 button:disabled {
@@ -130,5 +184,10 @@ button:disabled {
 
   .widget {
     padding: 14px;
+    border-radius: var(--r-lg);
+  }
+
+  .widget__messages {
+    max-height: 360px;
   }
 }
