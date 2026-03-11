@@ -1,4 +1,4 @@
-import { buildClarifyingQuestions, detectMissingFields } from "../engine/clarifier.js";
+﻿import { buildClarifyingQuestions, detectMissingFields } from "../engine/clarifier.js";
 import { calculateProject } from "../engine/calculator.js";
 import { detectChatLanguage, normalizeChatLanguage } from "../engine/language.js";
 import { normalizeWorks } from "../engine/normalizer.js";
@@ -20,8 +20,7 @@ const PROMPTS = Object.freeze({
       "Opisz zakres prac, powierzchnie/ilosci, miasto i preferowany termin realizacji.",
     ready:
       "Wstepna wycena jest gotowa. Potwierdz, jesli moge przekazac ja do opiekuna.",
-    clarifying:
-      "Potrzebuje jeszcze kilku informacji, aby dokonczyc wycene:",
+    clarifying: "Potrzebuje jeszcze kilku informacji, aby dokonczyc wycene:",
     generic: "Podaj prosze wiecej szczegolow o zakresie prac i ilosciach.",
   }),
   en: Object.freeze({
@@ -67,7 +66,7 @@ function ensureSessionShape(session) {
   };
 }
 
-function buildAgentReply(status, questions, language) {
+function buildTemplateReply(status, questions, language) {
   const pack = getLanguagePack(language);
 
   if (status === "ready_for_confirmation") {
@@ -79,6 +78,43 @@ function buildAgentReply(status, questions, language) {
   }
 
   return pack.generic;
+}
+
+async function buildAssistantMessage({
+  composeAssistantMessage,
+  language,
+  status,
+  questions,
+  missingFields,
+  latestUserMessage,
+  estimate,
+}) {
+  const fallbackMessage = buildTemplateReply(status, questions, language);
+
+  if (typeof composeAssistantMessage !== "function") {
+    return fallbackMessage;
+  }
+
+  try {
+    const generated = await composeAssistantMessage({
+      language,
+      status,
+      questions,
+      missingFields,
+      fallbackMessage,
+      latestUserMessage,
+      estimate,
+    });
+
+    const normalized = String(generated ?? "").trim();
+    if (normalized) {
+      return normalized;
+    }
+  } catch (error) {
+    // Use deterministic fallback if AI phrasing fails.
+  }
+
+  return fallbackMessage;
 }
 
 function buildTransferPayload(session) {
@@ -95,7 +131,7 @@ function buildTransferPayload(session) {
   };
 }
 
-export function createChatAgent({ extractWorks }) {
+export function createChatAgent({ extractWorks, composeAssistantMessage = null }) {
   if (typeof extractWorks !== "function") {
     throw new Error("extractWorks handler is required.");
   }
@@ -148,6 +184,16 @@ export function createChatAgent({ extractWorks }) {
       const status =
         missingFields.length === 0 ? "ready_for_confirmation" : "needs_clarification";
 
+      const assistantMessage = await buildAssistantMessage({
+        composeAssistantMessage,
+        language,
+        status,
+        questions,
+        missingFields,
+        latestUserMessage: cleanedMessage,
+        estimate,
+      });
+
       const updatedSession = {
         ...safeSession,
         updatedAt: nowIso(),
@@ -167,7 +213,7 @@ export function createChatAgent({ extractWorks }) {
         response: {
           sessionId: updatedSession.sessionId,
           status,
-          assistantMessage: buildAgentReply(status, questions, language),
+          assistantMessage,
           questions,
           missingFields,
           warnings,

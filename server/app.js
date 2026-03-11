@@ -8,6 +8,7 @@ import { SessionRepository } from "../storage/repository.js";
 import { OutboxRepository } from "../storage/outbox-repository.js";
 import { createOpenAIExtractor } from "../services/extractor.js";
 import { createChatAgent } from "../services/chat-agent.js";
+import { createOpenAIResponseComposer } from "../services/response-composer.js";
 import { createCrmClient } from "../services/crm-client.js";
 import { createAlertClient } from "../services/alert-client.js";
 import { CrmOutboxProcessor } from "../services/outbox-processor.js";
@@ -847,6 +848,7 @@ export async function createDefaultApp() {
 
   const agent = createChatAgent({
     extractWorks: createOpenAIExtractor(),
+    composeAssistantMessage: createOpenAIResponseComposer(),
   });
   const crmClient = createCrmClient();
   const alertClient = createAlertClient();
