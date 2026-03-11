@@ -60,7 +60,10 @@ function renderEstimate(payload) {
     return;
   }
 
-  const rows = estimate.breakdown
+  const visibleBreakdown = (estimate.breakdown ?? []).filter(
+    (line) => line?.name !== "minimum_order_adjustment",
+  );
+  const rows = visibleBreakdown
     .map(
       (line) =>
         `<li>${line.name}: ${line.quantity} ${line.unit} x ${line.unitPrice} = ${line.total} PLN</li>`,
@@ -69,9 +72,8 @@ function renderEstimate(payload) {
 
   estimateEl.innerHTML = `
     <strong>Wycena:</strong>
-    <div>Suma czesciowa: ${estimate.subtotal} PLN</div>
     <div>Lacznie: ${estimate.total} PLN</div>
-    <ul>${rows}</ul>
+    ${rows ? `<ul>${rows}</ul>` : ""}
   `;
 }
 
