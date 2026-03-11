@@ -536,7 +536,8 @@ export function createHttpApp({
           sendJson(req, res, pathname, 200, {
             sessionId: session.sessionId,
             status: session.status,
-            assistantMessage: agent.getInitialPrompt(),
+            assistantMessage: agent.getInitialPrompt({ language: session.language }),
+            language: session.language ?? "pl",
             missingFields: DEFAULT_INITIAL_FIELDS,
             questions: [],
             works: session.works,
@@ -600,6 +601,7 @@ export function createHttpApp({
         sendJson(req, res, pathname, 200, {
           sessionId: session.sessionId,
           status: session.status,
+          language: session.language ?? "pl",
           works: session.works,
           warnings: session.warnings,
           missingFields: session.missingFields,
@@ -671,6 +673,7 @@ export function createHttpApp({
         sendJson(req, res, pathname, 200, {
           sessionId: savedSession.sessionId,
           status: savedSession.status,
+          language: savedSession.language ?? "pl",
           alreadyConfirmed: Boolean(confirmation.alreadyConfirmed),
           transferPayload: confirmation.transferPayload,
           crmLead,

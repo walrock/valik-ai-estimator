@@ -59,6 +59,7 @@ export const ChatStateSchema = z.object({
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
   status: z.enum(["active", "needs_clarification", "ready_for_confirmation", "confirmed"]),
+  language: z.enum(["pl", "en", "ru"]).default("pl"),
   works: z.array(WorkItemSchema).default([]),
   missingFields: z.array(z.string()).default([]),
   lastUserMessage: z.string().default(""),

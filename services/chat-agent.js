@@ -1,5 +1,6 @@
 import { buildClarifyingQuestions, detectMissingFields } from "../engine/clarifier.js";
 import { calculateProject } from "../engine/calculator.js";
+import { detectChatLanguage, normalizeChatLanguage } from "../engine/language.js";
 import { normalizeWorks } from "../engine/normalizer.js";
 import { resolveWorkQuantities } from "../engine/quantity.js";
 import { mergeWorkLists } from "../engine/works.js";
@@ -11,6 +12,36 @@ function uniqueStrings(values) {
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+const PROMPTS = Object.freeze({
+  pl: Object.freeze({
+    initial:
+      "Opisz zakres prac, powierzchnie/ilosci, miasto i preferowany termin realizacji.",
+    ready:
+      "Wstepna wycena jest gotowa. Potwierdz, jesli moge przekazac ja do opiekuna.",
+    clarifying:
+      "Potrzebuje jeszcze kilku informacji, aby dokonczyc wycene:",
+    generic: "Podaj prosze wiecej szczegolow o zakresie prac i ilosciach.",
+  }),
+  en: Object.freeze({
+    initial:
+      "Describe required works, area/quantity, city and preferred timeline.",
+    ready: "The draft estimate is ready. Confirm if I can pass it to a manager.",
+    clarifying: "I need a few more details to complete the estimate:",
+    generic: "Please provide more details about works and quantities.",
+  }),
+  ru: Object.freeze({
+    initial: "Опишите работы, площадь/количество, город и желаемые сроки.",
+    ready: "Черновая смета готова. Подтвердите, и я передам ее менеджеру.",
+    clarifying: "Мне нужно еще несколько деталей, чтобы завершить смету:",
+    generic: "Пожалуйста, уточните работы и объемы.",
+  }),
+});
+
+function getLanguagePack(language) {
+  const normalizedLanguage = normalizeChatLanguage(language, "pl");
+  return PROMPTS[normalizedLanguage] ?? PROMPTS.pl;
 }
 
 function ensureSessionShape(session) {
@@ -32,19 +63,22 @@ function ensureSessionShape(session) {
     warnings: [],
     estimate: null,
     questions: [],
+    language: "pl",
   };
 }
 
-function buildAgentReply(status, questions) {
+function buildAgentReply(status, questions, language) {
+  const pack = getLanguagePack(language);
+
   if (status === "ready_for_confirmation") {
-    return "Wstepna wycena jest gotowa. Potwierdz, jesli moge przekazac ja do opiekuna.";
+    return pack.ready;
   }
 
   if (questions.length > 0) {
-    return `Potrzebuje jeszcze kilku informacji, aby dokonczyc wycene:\n- ${questions.join("\n- ")}`;
+    return `${pack.clarifying}\n- ${questions.join("\n- ")}`;
   }
 
-  return "Podaj prosze wiecej szczegolow o zakresie prac i ilosciach.";
+  return pack.generic;
 }
 
 function buildTransferPayload(session) {
@@ -57,6 +91,7 @@ function buildTransferPayload(session) {
     estimate: session.estimate,
     warnings: session.warnings,
     transcript: session.userMessages,
+    language: session.language,
   };
 }
 
@@ -66,8 +101,8 @@ export function createChatAgent({ extractWorks }) {
   }
 
   return {
-    getInitialPrompt() {
-      return "Opisz zakres prac, powierzchnie/ilosci, miasto i preferowany termin realizacji.";
+    getInitialPrompt({ language = "pl" } = {}) {
+      return getLanguagePack(language).initial;
     },
 
     async processMessage({ session, message }) {
@@ -77,6 +112,12 @@ export function createChatAgent({ extractWorks }) {
       if (!cleanedMessage) {
         throw new Error("Message is required.");
       }
+
+      const detectedLanguage = detectChatLanguage(cleanedMessage);
+      const language = normalizeChatLanguage(
+        detectedLanguage ?? safeSession.language,
+        "pl",
+      );
 
       const extraction = await extractWorks(cleanedMessage);
       const normalized = normalizeWorks(extraction.works);
@@ -94,7 +135,7 @@ export function createChatAgent({ extractWorks }) {
         message: conversationText,
         works,
       });
-      const questions = buildClarifyingQuestions(missingFields);
+      const questions = buildClarifyingQuestions(missingFields, { language });
 
       const warnings = uniqueStrings([
         ...safeSession.warnings,
@@ -118,6 +159,7 @@ export function createChatAgent({ extractWorks }) {
         warnings,
         userMessages,
         lastUserMessage: cleanedMessage,
+        language,
       };
 
       return {
@@ -125,12 +167,13 @@ export function createChatAgent({ extractWorks }) {
         response: {
           sessionId: updatedSession.sessionId,
           status,
-          assistantMessage: buildAgentReply(status, questions),
+          assistantMessage: buildAgentReply(status, questions, language),
           questions,
           missingFields,
           warnings,
           works,
           estimate,
+          language,
         },
       };
     },

@@ -109,6 +109,8 @@ test("API workflow: start chat, clarify details, get estimate and confirm", asyn
     const started = await startResponse.json();
     assert.ok(started.sessionId);
     assert.equal(started.status, "needs_clarification");
+    assert.equal(started.language, "en");
+    assert.ok(started.assistantMessage.includes("I need a few more details"));
     assert.equal(started.estimate.subtotal, 1650);
     assert.ok(started.missingFields.includes("deadline"));
     assert.ok(started.missingFields.includes("city"));
@@ -195,8 +197,31 @@ test("API start endpoint supports empty body and returns initial prompt", async 
     const payload = await response.json();
     assert.ok(payload.sessionId);
     assert.equal(payload.status, "active");
+    assert.equal(payload.language, "pl");
     assert.ok(payload.assistantMessage.length > 0);
     assert.ok(payload.missingFields.includes("work_scope"));
+  } finally {
+    await runtime.cleanup();
+  }
+});
+
+test("API responds in Russian when the user message is in Cyrillic", async () => {
+  const runtime = await buildTestApp();
+
+  try {
+    const response = await fetch(`${runtime.baseUrl}/api/chat/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: "привет, нужна смета",
+      }),
+    });
+
+    assert.equal(response.status, 200);
+    const payload = await response.json();
+    assert.equal(payload.status, "needs_clarification");
+    assert.equal(payload.language, "ru");
+    assert.ok(payload.assistantMessage.includes("Мне нужно еще несколько деталей"));
   } finally {
     await runtime.cleanup();
   }

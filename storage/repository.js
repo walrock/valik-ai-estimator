@@ -23,6 +23,7 @@ function buildEmptySession(sessionId) {
     questions: [],
     userMessages: [],
     lastUserMessage: "",
+    language: "pl",
   };
 }
 
@@ -39,6 +40,15 @@ function parseJson(value, fallback) {
     return JSON.parse(value);
   } catch (error) {
     return fallback;
+  }
+}
+
+function ensureSessionLanguageColumn(db) {
+  const columns = db.prepare("PRAGMA table_info(sessions)").all();
+  const hasLanguageColumn = columns.some((column) => column.name === "language");
+
+  if (!hasLanguageColumn) {
+    db.exec("ALTER TABLE sessions ADD COLUMN language TEXT NOT NULL DEFAULT 'pl';");
   }
 }
 
@@ -60,6 +70,7 @@ function rowToSession(row) {
     questions: parseJson(row.questions_json, []),
     userMessages: parseJson(row.user_messages_json, []),
     lastUserMessage: row.last_user_message ?? "",
+    language: row.language ?? "pl",
   };
 }
 
@@ -77,6 +88,7 @@ function toDbParams(session) {
     questions_json: serializeJson(session.questions, []),
     user_messages_json: serializeJson(session.userMessages, []),
     last_user_message: session.lastUserMessage ?? "",
+    language: session.language ?? "pl",
   };
 }
 
@@ -106,6 +118,7 @@ export class SessionRepository {
         updated_at TEXT NOT NULL,
         confirmed_at TEXT,
         status TEXT NOT NULL,
+        language TEXT NOT NULL DEFAULT 'pl',
         works_json TEXT NOT NULL,
         estimate_json TEXT,
         warnings_json TEXT NOT NULL,
@@ -119,6 +132,7 @@ export class SessionRepository {
       ON sessions(updated_at DESC);
     `);
 
+    ensureSessionLanguageColumn(this.db);
     await this.maybeMigrateLegacyJson();
   }
 
@@ -160,10 +174,12 @@ export class SessionRepository {
     const insert = this.db.prepare(`
       INSERT OR REPLACE INTO sessions (
         session_id, created_at, updated_at, confirmed_at, status,
+        language,
         works_json, estimate_json, warnings_json, missing_fields_json,
         questions_json, user_messages_json, last_user_message
       ) VALUES (
         :session_id, :created_at, :updated_at, :confirmed_at, :status,
+        :language,
         :works_json, :estimate_json, :warnings_json, :missing_fields_json,
         :questions_json, :user_messages_json, :last_user_message
       )
@@ -220,10 +236,12 @@ export class SessionRepository {
       .prepare(`
         INSERT INTO sessions (
           session_id, created_at, updated_at, confirmed_at, status,
+          language,
           works_json, estimate_json, warnings_json, missing_fields_json,
           questions_json, user_messages_json, last_user_message
         ) VALUES (
           :session_id, :created_at, :updated_at, :confirmed_at, :status,
+          :language,
           :works_json, :estimate_json, :warnings_json, :missing_fields_json,
           :questions_json, :user_messages_json, :last_user_message
         )
@@ -232,6 +250,7 @@ export class SessionRepository {
           updated_at = excluded.updated_at,
           confirmed_at = excluded.confirmed_at,
           status = excluded.status,
+          language = excluded.language,
           works_json = excluded.works_json,
           estimate_json = excluded.estimate_json,
           warnings_json = excluded.warnings_json,
