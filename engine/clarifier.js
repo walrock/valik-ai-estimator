@@ -2,6 +2,12 @@
 
 const TOKEN_BOUNDARY_LEFT = String.raw`(?<![\p{L}\p{N}_])`;
 const TOKEN_BOUNDARY_RIGHT = String.raw`(?![\p{L}\p{N}_])`;
+const RU_MONTH_PATTERN =
+  "(?:январ[ьяе]|феврал[ьяе]|март[ае]?|апрел[ьяе]|ма[йяе]|июн[ьяе]|июл[ьяе]|август[ае]?|сентябр[ьяе]|октябр[ьяе]|ноябр[ьяе]|декабр[ьяе])";
+const PL_MONTH_PATTERN =
+  "(?:styczni[aeu]|lut(?:y|ego)|marca|kwietni[aeu]|maja|czerwca|lipca|sierpni[aeu]|wrze(?:ś|s)ni[aeu]|pa(?:ź|z)dziernik[aeu]|listopada|grudni[aeu])";
+const EN_MONTH_PATTERN =
+  "(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)";
 
 const AREA_PATTERN = new RegExp(
   `${TOKEN_BOUNDARY_LEFT}\\d+(?:[.,]\\d+)?\\s*(?:m2|m\\^2|m²|м2|м\\^2|м²|sqm|кв\\.?\\s*м|квм)${TOKEN_BOUNDARY_RIGHT}`,
@@ -31,6 +37,15 @@ const DEADLINE_PATTERN = new RegExp(
       "на следующей неделе",
       "на следующем месяце",
       "через\\s+\\d+\\s*(?:день|дня|дней|недел[яиюе]|месяц|месяца|месяцев)",
+      "(?:срок|скрок|deadline|termin|start(?:\\s+date)?|rozpoczecie|rozpoczecia)\\s*[:\\-]?\\s*\\d+\\s*(?:day|days|week|weeks|month|months|dzien|dni|tydzien|tygodnie|tygodni|miesiac|miesiace|miesiecy|день|дня|дней|недел[яиюе]|месяц|месяца|месяцев)",
+      "(?:с|со|od|from)\\s+\\d{1,2}\\s*(?:" +
+        RU_MONTH_PATTERN +
+        "|" +
+        PL_MONTH_PATTERN +
+        "|" +
+        EN_MONTH_PATTERN +
+        ")",
+      "(?:deadline|termin|start(?:\\s+date)?|od|from|с|со|до)\\s+\\d{1,2}[./-]\\d{1,2}(?:[./-]\\d{2,4})?",
     ].join("|"),
     `)${TOKEN_BOUNDARY_RIGHT}`,
   ].join(""),

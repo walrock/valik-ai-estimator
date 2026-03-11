@@ -47,6 +47,26 @@ test("clarifier recognizes Russian demolition details with city and floor forms"
   assert.ok(!missingFields.includes("deadline"));
 });
 
+test("clarifier recognizes Russian duration with explicit start date", () => {
+  const missingFields = detectMissingFields({
+    message: "покраска 460м2, город гданьск, скрок 2 месяца с 20 марта",
+    works: [{ category: "painting", type: "paint_2_layers", quantity: 460 }],
+  });
+
+  assert.ok(!missingFields.includes("city"));
+  assert.ok(!missingFields.includes("deadline"));
+});
+
+test("clarifier recognizes numeric deadline date formats with keyword", () => {
+  const missingFields = detectMissingFields({
+    message: "tile 30m2 in Gdansk, deadline 20.03.2026",
+    works: [{ category: "tiling", type: "tile_10_15", quantity: 30 }],
+  });
+
+  assert.ok(!missingFields.includes("city"));
+  assert.ok(!missingFields.includes("deadline"));
+});
+
 test("clarifier returns mapped questions for missing fields in Polish", () => {
   const questions = buildClarifyingQuestions(["deadline", "city"], {
     language: "pl",
