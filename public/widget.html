@@ -1,20 +1,20 @@
 <!doctype html>
-<html lang="ru">
+<html lang="pl">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Valik AI Estimator Widget</title>
+    <title>Kalkulator Wyceny AI</title>
     <link rel="stylesheet" href="/widget.css" />
   </head>
   <body>
     <main class="widget">
       <header class="widget__header">
-        <h1>Valik AI Estimator</h1>
-        <p>Describe project needs and the agent will prepare an estimate draft.</p>
+        <h1>Kalkulator Wyceny AI</h1>
+        <p>Opisz zakres prac, a asystent przygotuje wstepna wycene.</p>
       </header>
 
       <section class="widget__status" id="status">
-        <strong>Status:</strong> Waiting for first message
+        <strong>Status:</strong> Oczekuje na pierwsza wiadomosc
       </section>
 
       <section class="widget__messages" id="messages"></section>
@@ -26,12 +26,12 @@
           id="messageInput"
           name="message"
           rows="3"
-          placeholder="Example: Bathroom 6m2, remove tile without lift, tile 60x60..."
+          placeholder="Np. Lazienka 6m2, skucie starych plytek, plytki 60x60..."
           required
         ></textarea>
         <div class="widget__actions">
-          <button type="submit" id="sendBtn">Send</button>
-          <button type="button" id="confirmBtn" disabled>Confirm estimate</button>
+          <button type="submit" id="sendBtn">Wyslij</button>
+          <button type="button" id="confirmBtn" disabled>Potwierdz wycene</button>
         </div>
       </form>
 

@@ -37,14 +37,14 @@ function ensureSessionShape(session) {
 
 function buildAgentReply(status, questions) {
   if (status === "ready_for_confirmation") {
-    return "Estimate draft is ready. Please confirm if we can send it to a manager.";
+    return "Wstepna wycena jest gotowa. Potwierdz, jesli moge przekazac ja do opiekuna.";
   }
 
   if (questions.length > 0) {
-    return `I need a few details to finalize the estimate:\n- ${questions.join("\n- ")}`;
+    return `Potrzebuje jeszcze kilku informacji, aby dokonczyc wycene:\n- ${questions.join("\n- ")}`;
   }
 
-  return "Please provide more details about works and quantities.";
+  return "Podaj prosze wiecej szczegolow o zakresie prac i ilosciach.";
 }
 
 function buildTransferPayload(session) {
@@ -67,7 +67,7 @@ export function createChatAgent({ extractWorks }) {
 
   return {
     getInitialPrompt() {
-      return "Describe required works, area/quantity, city and preferred timeline.";
+      return "Opisz zakres prac, powierzchnie/ilosci, miasto i preferowany termin realizacji.";
     },
 
     async processMessage({ session, message }) {

@@ -210,7 +210,7 @@ test("API serves widget static page", async () => {
     assert.equal(response.status, 200);
 
     const html = await response.text();
-    assert.ok(html.includes("Valik AI Estimator"));
+    assert.ok(html.includes("Kalkulator Wyceny AI"));
     assert.ok(html.includes("/widget.js"));
   } finally {
     await runtime.cleanup();

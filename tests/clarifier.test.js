@@ -29,7 +29,7 @@ test("clarifier returns mapped questions for missing fields", () => {
   const questions = buildClarifyingQuestions(["deadline", "city"]);
 
   assert.deepEqual(questions, [
-    "What is the expected start date or deadline for the project?",
-    "In which city is the project located?",
+    "Jaki jest planowany termin rozpoczęcia lub deadline realizacji?",
+    "W jakim mieście znajduje się inwestycja?",
   ]);
 });

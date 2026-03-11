@@ -4,6 +4,13 @@ const state = {
   lastEstimate: null,
 };
 
+const STATUS_LABELS = Object.freeze({
+  active: "aktywna",
+  needs_clarification: "wymaga doprecyzowania",
+  ready_for_confirmation: "gotowa do potwierdzenia",
+  confirmed: "potwierdzona",
+});
+
 const messagesEl = document.getElementById("messages");
 const statusEl = document.getElementById("status");
 const estimateEl = document.getElementById("estimate");
@@ -20,28 +27,29 @@ function appendMessage(text, role) {
   messagesEl.appendChild(item);
 }
 
-function setStatus(text) {
-  statusEl.innerHTML = `<strong>Status:</strong> ${text}`;
+function setStatus(status) {
+  const label = STATUS_LABELS[status] ?? status;
+  statusEl.innerHTML = `<strong>Status:</strong> ${label}`;
 }
 
 function renderEstimate(payload) {
   const estimate = payload?.estimate;
   if (!estimate) {
-    estimateEl.innerHTML = "<strong>Estimate:</strong> not ready yet";
+    estimateEl.innerHTML = "<strong>Wycena:</strong> jeszcze niegotowa";
     return;
   }
 
   const rows = estimate.breakdown
     .map(
       (line) =>
-        `<li>${line.name}: ${line.quantity} ${line.unit} × ${line.unitPrice} = ${line.total} PLN</li>`,
+        `<li>${line.name}: ${line.quantity} ${line.unit} x ${line.unitPrice} = ${line.total} PLN</li>`,
     )
     .join("");
 
   estimateEl.innerHTML = `
-    <strong>Estimate:</strong>
-    <div>Subtotal: ${estimate.subtotal} PLN</div>
-    <div>Total: ${estimate.total} PLN</div>
+    <strong>Wycena:</strong>
+    <div>Suma czesciowa: ${estimate.subtotal} PLN</div>
+    <div>Lacznie: ${estimate.total} PLN</div>
     <ul>${rows}</ul>
   `;
 }
@@ -51,7 +59,7 @@ function renderWarnings(payload) {
     return;
   }
 
-  appendMessage(`Warnings: ${payload.warnings.join(" | ")}`, "assistant");
+  appendMessage(`Uwagi: ${payload.warnings.join(" | ")}`, "assistant");
 }
 
 function renderResponse(payload) {
@@ -59,7 +67,7 @@ function renderResponse(payload) {
   state.status = payload.status ?? state.status;
   state.lastEstimate = payload.estimate ?? state.lastEstimate;
 
-  setStatus(payload.status ?? "active");
+  setStatus(state.status);
 
   if (payload.assistantMessage) {
     appendMessage(payload.assistantMessage, "assistant");
@@ -77,7 +85,14 @@ async function postJson(url, body) {
     body: JSON.stringify(body),
   });
 
-  const payload = await response.json();
+  const raw = await response.text();
+  let payload = {};
+  try {
+    payload = raw ? JSON.parse(raw) : {};
+  } catch (error) {
+    throw new Error(`Serwer zwrocil niepoprawna odpowiedz (${response.status}).`);
+  }
+
   if (!response.ok) {
     throw new Error(payload.error || `HTTP ${response.status}`);
   }
@@ -104,7 +119,7 @@ async function handleSend(message) {
 
     renderResponse(payload);
   } catch (error) {
-    appendMessage(`Error: ${error.message}`, "assistant");
+    appendMessage(`Blad: ${error.message}`, "assistant");
   } finally {
     sendBtn.disabled = false;
     confirmBtn.disabled = state.status !== "ready_for_confirmation";
@@ -125,17 +140,20 @@ async function handleConfirm() {
     });
 
     setStatus(payload.status);
-    appendMessage("Estimate confirmed and ready for manager handoff.", "assistant");
+    appendMessage(
+      "Wycena zostala potwierdzona i jest gotowa do przekazania opiekunowi.",
+      "assistant",
+    );
 
     crmResultEl.innerHTML = `
-      <strong>CRM DTO (preview):</strong>
+      <strong>CRM DTO (podglad):</strong>
       <div>sessionId: ${payload.crmLead.sessionId}</div>
-      <div>city: ${payload.crmLead.customer.city ?? "n/a"}</div>
-      <div>timeline: ${payload.crmLead.customer.timeline ?? "n/a"}</div>
-      <div>total: ${payload.crmLead.estimate.total} ${payload.crmLead.estimate.currency}</div>
+      <div>miasto: ${payload.crmLead.customer.city ?? "brak"}</div>
+      <div>termin: ${payload.crmLead.customer.timeline ?? "brak"}</div>
+      <div>lacznie: ${payload.crmLead.estimate.total} ${payload.crmLead.estimate.currency}</div>
     `;
   } catch (error) {
-    appendMessage(`Confirm error: ${error.message}`, "assistant");
+    appendMessage(`Blad potwierdzenia: ${error.message}`, "assistant");
   } finally {
     confirmBtn.disabled = false;
   }
@@ -154,6 +172,6 @@ chatForm.addEventListener("submit", async (event) => {
 
 confirmBtn.addEventListener("click", handleConfirm);
 
-setStatus("Waiting for first message");
-estimateEl.innerHTML = "<strong>Estimate:</strong> not ready yet";
-crmResultEl.innerHTML = "<strong>CRM DTO:</strong> available after confirmation";
+setStatus("active");
+estimateEl.innerHTML = "<strong>Wycena:</strong> jeszcze niegotowa";
+crmResultEl.innerHTML = "<strong>CRM DTO:</strong> dostepne po potwierdzeniu";
