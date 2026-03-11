@@ -73,10 +73,12 @@ export function createOpenAIResponseComposer({
       CONFIRM_BUTTON_LABEL[safeLanguage] ?? CONFIRM_BUTTON_LABEL.pl;
     const latestText = String(latestUserMessage ?? "");
     const userAskedQuestion = /[?？]/u.test(latestText);
+    const mustCollectDetails =
+      offTopic || (Array.isArray(missingFields) && missingFields.length > 0);
 
     const response = await openai.chat.completions.create({
       model,
-      temperature: 0.35,
+      temperature: 0.45,
       messages: [
         {
           role: "system",
@@ -85,13 +87,15 @@ export function createOpenAIResponseComposer({
             "Return plain text only.",
             "Use the requested language code exactly: pl, en or ru.",
             "Tone: warm, professional, consultative, conversion-focused.",
-            "Keep message concise and natural (1-4 short lines).",
-            "Prefer short actionable phrasing and clear next step.",
+            "Keep message concise and natural (2-8 short lines).",
+            "Prefer natural conversational phrasing, not robotic templates.",
             "Do not change facts, numbers, status, or required questions.",
             "Do not invent services, discounts, guarantees, deadlines, or prices.",
-            "If userAskedQuestion is true, first answer that question in one short sentence using knownFacts only.",
+            "Start with a short direct answer to the latest user message.",
             "If offTopic is true, clearly say this chat handles only renovation estimate topics and redirect user to estimate details.",
             "If the user asks something outside available facts but still related to estimate, say a manager will clarify it after confirmation.",
+            "When mustCollectDetails is true, always end with a data request block and include the provided questions as bullet points.",
+            "Use each question from the provided questions list exactly, do not rewrite them.",
             "If status is ready_for_confirmation, ask for confirmation.",
             "If status is needs_clarification, ask only for missing details.",
             "If status is active, ask for project scope details.",
@@ -108,6 +112,7 @@ export function createOpenAIResponseComposer({
             latestUserMessage: latestText,
             userAskedQuestion,
             offTopic,
+            mustCollectDetails,
             estimate: estimate
               ? {
                   subtotal: estimate.subtotal,

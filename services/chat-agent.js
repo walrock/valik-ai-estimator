@@ -337,6 +337,49 @@ function buildOffTopicFallback(status, questions, language) {
   return `${scopeReply}\n${pack.generic}`;
 }
 
+const CLARIFICATION_FOOTER = Object.freeze({
+  pl: "Aby dokladnie policzyc wycene, podaj prosze:",
+  en: "To prepare an accurate estimate, please provide:",
+  ru: "Чтобы точно рассчитать смету, пожалуйста, укажите:",
+});
+
+function hasAllQuestionsIncluded(message, questions) {
+  const normalized = String(message ?? "").toLowerCase();
+  return questions.every((question) =>
+    normalized.includes(String(question ?? "").toLowerCase()),
+  );
+}
+
+function buildClarificationFooter(questions, language) {
+  if (!Array.isArray(questions) || questions.length === 0) {
+    return "";
+  }
+
+  const normalizedLanguage = normalizeChatLanguage(language, "pl");
+  const header = CLARIFICATION_FOOTER[normalizedLanguage] ?? CLARIFICATION_FOOTER.pl;
+  return `${header}\n- ${questions.join("\n- ")}`;
+}
+
+function ensureClarificationDataRequest(message, { status, questions, language, offTopic }) {
+  const base = String(message ?? "").trim();
+  const safeQuestions = Array.isArray(questions) ? questions.filter(Boolean) : [];
+  if (!base || safeQuestions.length === 0) {
+    return base;
+  }
+
+  const needsDataRequest = status === "needs_clarification" || offTopic;
+  if (!needsDataRequest || hasAllQuestionsIncluded(base, safeQuestions)) {
+    return base;
+  }
+
+  const footer = buildClarificationFooter(safeQuestions, language);
+  if (!footer) {
+    return base;
+  }
+
+  return `${base}\n${footer}`;
+}
+
 async function buildAssistantMessage({
   composeAssistantMessage,
   language,
@@ -374,7 +417,13 @@ async function buildAssistantMessage({
         language,
         offTopic,
       });
-      return enforceSalesTone(withQuestionAnswer, { status, language });
+      const withDataRequest = ensureClarificationDataRequest(withQuestionAnswer, {
+        status,
+        questions,
+        language,
+        offTopic,
+      });
+      return enforceSalesTone(withDataRequest, { status, language });
     }
   } catch (error) {
     // Use deterministic fallback if AI phrasing fails.
@@ -385,7 +434,16 @@ async function buildAssistantMessage({
     language,
     offTopic,
   });
-  return enforceSalesTone(fallbackWithQuestionAnswer, { status, language });
+  const fallbackWithDataRequest = ensureClarificationDataRequest(
+    fallbackWithQuestionAnswer,
+    {
+      status,
+      questions,
+      language,
+      offTopic,
+    },
+  );
+  return enforceSalesTone(fallbackWithDataRequest, { status, language });
 }
 
 function buildTransferPayload(session) {

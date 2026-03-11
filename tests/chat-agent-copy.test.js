@@ -250,3 +250,45 @@ test("chat agent keeps ready status after off-topic question", async () => {
   );
   assert.match(result.response.assistantMessage, /Confirm estimate/i);
 });
+
+test("chat agent appends missing-data questions when AI reply is too generic", async () => {
+  const extractWorks = createStaticExtractor(() => ({ works: [] }));
+  const composeAssistantMessage = async () =>
+    "Sure, I can help. Please share a bit more.";
+  const agent = createChatAgent({ extractWorks, composeAssistantMessage });
+
+  const session = {
+    sessionId: "session-data-request-1",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    status: "active",
+    works: [],
+    missingFields: [],
+    lastUserMessage: "",
+    userMessages: [],
+    questions: [],
+    warnings: [],
+    estimate: null,
+    confirmedAt: null,
+    language: "en",
+  };
+
+  const result = await agent.processMessage({
+    session,
+    message: "Hello",
+  });
+
+  assert.equal(result.response.status, "needs_clarification");
+  assert.match(
+    result.response.assistantMessage,
+    /To prepare an accurate estimate, please provide:/i,
+  );
+  assert.match(
+    result.response.assistantMessage,
+    /Which exact works should be included in the estimate\?/i,
+  );
+  assert.match(
+    result.response.assistantMessage,
+    /In which city is the project located\?/i,
+  );
+});
