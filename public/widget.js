@@ -20,12 +20,27 @@ const messageInput = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
 const confirmBtn = document.getElementById("confirmBtn");
 
+function scrollMessagesToBottom({ smooth = true } = {}) {
+  if (!messagesEl) {
+    return;
+  }
+
+  const behavior = smooth ? "smooth" : "auto";
+  requestAnimationFrame(() => {
+    messagesEl.scrollTo({
+      top: messagesEl.scrollHeight,
+      behavior,
+    });
+  });
+}
+
 function appendMessage(text, role) {
   const item = document.createElement("div");
   item.className = `msg msg--${role}`;
   item.textContent =
     role === "assistant" ? normalizeAssistantMessage(text) : String(text ?? "");
   messagesEl.appendChild(item);
+  scrollMessagesToBottom();
 }
 
 function setStatus(status) {
@@ -99,6 +114,7 @@ function renderResponse(payload) {
   renderEstimate(payload);
   renderWarnings(payload);
   confirmBtn.disabled = state.status !== "ready_for_confirmation";
+  scrollMessagesToBottom();
 }
 
 async function postJson(url, body) {
@@ -180,6 +196,7 @@ async function handleConfirm() {
     appendMessage(`Blad potwierdzenia: ${error.message}`, "assistant");
   } finally {
     confirmBtn.disabled = state.status !== "ready_for_confirmation";
+    scrollMessagesToBottom();
   }
 }
 

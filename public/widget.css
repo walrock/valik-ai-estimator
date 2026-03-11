@@ -74,6 +74,7 @@ body {
   background: rgba(243, 241, 234, 0.72);
   display: grid;
   gap: 8px;
+  scroll-behavior: smooth;
 }
 
 .msg {

@@ -23,7 +23,7 @@ const PROMPTS = Object.freeze({
     confirmed:
       "Wycena jest juz potwierdzona i przekazana do opiekuna. Aby przygotowac nowa wycene, rozpocznij nowa rozmowe.",
     clarifying:
-      "Super, zeby przygotowac dokladna wycene, potrzebuje jeszcze kilku informacji:",
+      "Zeby przygotowac dokladna wycene, potrzebuje jeszcze kilku informacji:",
     generic:
       "Podaj prosze troche wiecej szczegolow o zakresie prac i ilosciach, a przygotuje dokladniejsza wycene.",
   }),
@@ -35,7 +35,7 @@ const PROMPTS = Object.freeze({
     confirmed:
       "This estimate is already confirmed and handed over to a manager. To prepare a new one, please start a new chat.",
     clarifying:
-      "Great, I need a few more details to complete an accurate estimate:",
+      "I need a few more details to complete an accurate estimate:",
     generic:
       "Please share a few more details about works and quantities, and I will prepare a more accurate estimate.",
   }),
@@ -46,7 +46,7 @@ const PROMPTS = Object.freeze({
     confirmed:
       "Эта смета уже подтверждена и передана менеджеру. Чтобы сделать новую смету, начните новый диалог.",
     clarifying:
-      "Отлично, чтобы подготовить точную смету, мне нужно еще несколько деталей:",
+      "Чтобы подготовить точную смету, мне нужно еще несколько деталей:",
     generic:
       "Пожалуйста, уточните работы и объемы, и я подготовлю более точную смету.",
   }),
@@ -54,19 +54,16 @@ const PROMPTS = Object.freeze({
 
 const SALES_STYLE = Object.freeze({
   pl: Object.freeze({
-    warmPrefix: "Super,",
     confirmButtonLabel: "Potwierdz wycene",
     confirmCta:
       'Jesli wszystko sie zgadza, kliknij "Potwierdz wycene", a przekaze dane do opiekuna.',
   }),
   en: Object.freeze({
-    warmPrefix: "Great,",
     confirmButtonLabel: "Confirm estimate",
     confirmCta:
       'If everything looks good, click "Confirm estimate" and I will pass it to a manager.',
   }),
   ru: Object.freeze({
-    warmPrefix: "Отлично,",
     confirmButtonLabel: "Подтвердить смету",
     confirmCta:
       'Если все верно, нажмите "Подтвердить смету", и я передам данные менеджеру.',
@@ -158,13 +155,6 @@ function enforceSalesTone(message, { status, language }) {
       return `${text}\n${style.confirmCta}`;
     }
     return text;
-  }
-
-  if (status === "needs_clarification") {
-    const prefixLowered = style.warmPrefix.toLowerCase();
-    if (!lowered.startsWith(prefixLowered)) {
-      return `${style.warmPrefix} ${text}`;
-    }
   }
 
   return text;

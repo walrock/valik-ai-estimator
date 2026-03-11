@@ -32,7 +32,7 @@ test("chat agent uses AI-composed reply when composer returns text", async () =>
   });
 
   assert.match(result.response.assistantMessage, /Custom assistant copy/);
-  assert.match(result.response.assistantMessage, /Great,/);
+  assert.doesNotMatch(result.response.assistantMessage, /^Great,\s/i);
 });
 
 test("chat agent adds direct answer for pricing questions before clarification", async () => {
