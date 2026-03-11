@@ -66,6 +66,7 @@ export function createOpenAIResponseComposer({
     fallbackMessage,
     latestUserMessage,
     estimate,
+    offTopic = false,
   }) {
     const safeLanguage = normalizeChatLanguage(language, "pl");
     const confirmButtonLabel =
@@ -89,7 +90,8 @@ export function createOpenAIResponseComposer({
             "Do not change facts, numbers, status, or required questions.",
             "Do not invent services, discounts, guarantees, deadlines, or prices.",
             "If userAskedQuestion is true, first answer that question in one short sentence using knownFacts only.",
-            "If the user asks something outside available facts, say a manager will clarify it after confirmation.",
+            "If offTopic is true, clearly say this chat handles only renovation estimate topics and redirect user to estimate details.",
+            "If the user asks something outside available facts but still related to estimate, say a manager will clarify it after confirmation.",
             "If status is ready_for_confirmation, ask for confirmation.",
             "If status is needs_clarification, ask only for missing details.",
             "If status is active, ask for project scope details.",
@@ -105,6 +107,7 @@ export function createOpenAIResponseComposer({
             missingFields: Array.isArray(missingFields) ? missingFields : [],
             latestUserMessage: latestText,
             userAskedQuestion,
+            offTopic,
             estimate: estimate
               ? {
                   subtotal: estimate.subtotal,
@@ -115,6 +118,7 @@ export function createOpenAIResponseComposer({
               "This is a draft estimate based on described works and quantities.",
               "Final total may be adjusted after full project details and manager review.",
               "Confirmation button sends the draft and contact context to a manager.",
+              "Service scope: renovation and finishing works for properties.",
             ],
             ui: {
               confirmButtonLabel,

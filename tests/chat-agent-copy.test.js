@@ -176,3 +176,77 @@ test("chat agent keeps session confirmed after additional user messages", async 
   assert.match(result.response.assistantMessage, /уже подтверждена/i);
   assert.deepEqual(result.response.missingFields, []);
 });
+
+test("chat agent handles unrelated questions as off-topic and redirects to estimate", async () => {
+  const extractWorks = createStaticExtractor(() => ({ works: [] }));
+  const composeAssistantMessage = async () => "Please share project details.";
+  const agent = createChatAgent({ extractWorks, composeAssistantMessage });
+
+  const session = {
+    sessionId: "session-offtopic-1",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    status: "active",
+    works: [],
+    missingFields: [],
+    lastUserMessage: "",
+    userMessages: [],
+    questions: [],
+    warnings: [],
+    estimate: null,
+    confirmedAt: null,
+    language: "en",
+  };
+
+  const result = await agent.processMessage({
+    session,
+    message: "What is the weather today?",
+  });
+
+  assert.equal(result.response.language, "en");
+  assert.equal(result.response.status, "needs_clarification");
+  assert.match(
+    result.response.assistantMessage,
+    /only help with renovation estimate requests/i,
+  );
+});
+
+test("chat agent keeps ready status after off-topic question", async () => {
+  const extractWorks = createStaticExtractor(() => ({ works: [] }));
+  const composeAssistantMessage = async () => "I can still help with your estimate.";
+  const agent = createChatAgent({ extractWorks, composeAssistantMessage });
+
+  const session = {
+    sessionId: "session-offtopic-ready-1",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    status: "ready_for_confirmation",
+    works: [{ category: "painting", type: "paint_2_layers", quantity: 20 }],
+    missingFields: [],
+    lastUserMessage: "",
+    userMessages: ["Paint walls 20m2 in Gdansk, start tomorrow"],
+    questions: [],
+    warnings: [],
+    estimate: {
+      subtotal: 500,
+      total: 1000,
+      breakdown: [],
+      warnings: [],
+      appliedRules: ["minimum_order"],
+    },
+    confirmedAt: null,
+    language: "en",
+  };
+
+  const result = await agent.processMessage({
+    session,
+    message: "Can you tell me football scores?",
+  });
+
+  assert.equal(result.response.status, "ready_for_confirmation");
+  assert.match(
+    result.response.assistantMessage,
+    /only help with renovation estimate requests/i,
+  );
+  assert.match(result.response.assistantMessage, /Confirm estimate/i);
+});

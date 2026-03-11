@@ -74,6 +74,14 @@ const SALES_STYLE = Object.freeze({
 });
 
 const QUESTION_PATTERN = /[?？]/u;
+const QUESTION_WORD_PATTERN =
+  /(?:\b(?:who|what|when|where|why|how|can|could|do|does|is|are)\b|\b(?:co|jak|kiedy|gdzie|dlaczego|czy|mozna|można)\b|\b(?:что|как|когда|где|почему|можно|можете|умеете|делаете|какой|какие)\b)/iu;
+const GREETING_PATTERN =
+  /^(?:hi|hello|hey|good (?:morning|afternoon|evening)|cze(?:s|ś)c|hej|dzien dobry|dzień dobry|witam|привет|здравствуй(?:те)?|добрый (?:день|вечер))[!.,\s?]*$/iu;
+const AREA_OR_QUANTITY_SIGNAL_PATTERN =
+  /\d+(?:[.,]\d+)?\s*(?:m2|m\^2|m²|sqm|sq\.?\s*m|кв\.?\s*м|квм|szt|szt\.|pcs?|шт)\b/iu;
+const PROJECT_SCOPE_SIGNAL_PATTERN =
+  /(?:estimate|quotation|quote|pricing|price|cost|paint|painting|plaster|tile|tiling|wall|walls|ceiling|floor|room|apartment|flat|house|renovat|remodel|repair|deadline|start date|city|malow|farb|szpachl|gips|tynk|plytk|płytk|scian|ścian|sufit|podlog|podłog|remont|wycen|koszt|termin|miast|mieszkan|łazien|lazien|kuchni|pokoj|покрас|краск|шпакл|штукатур|плитк|стен|потол|пол|ремонт|смет|оценк|стоимост|дедлайн|срок|город|объект|квартир|дом|ванн|кухн)/iu;
 const PRICE_QUESTION_PATTERN =
   /(?:\bprice\b|\bcost\b|\bcena\b|\bkoszt\b|wycen|цен|стоим|сколько)/i;
 const PROCESS_QUESTION_PATTERN =
@@ -92,6 +100,8 @@ const QUESTION_ANSWERS = Object.freeze({
     language: "Mozemy kontynuowac rozmowe po polsku, angielsku lub rosyjsku.",
     scope:
       "Wykonujemy prace remontowo-wykonczeniowe w nieruchomosciach, nie realizujemy lakierowania samochodow.",
+    offTopic:
+      "W tym czacie pomagam tylko w wycenie prac remontowo-wykonczeniowych i nie obslugujemy takich tematow.",
     generic:
       "Jasne, odpowiem krotko i jednoczesnie dopytam o dane potrzebne do wyceny.",
   }),
@@ -103,6 +113,8 @@ const QUESTION_ANSWERS = Object.freeze({
     language: "We can continue in Polish, English, or Russian.",
     scope:
       "We handle renovation and finishing works for properties; we do not provide car painting services.",
+    offTopic:
+      "In this chat I can only help with renovation estimate requests, so this topic is outside our scope.",
     generic:
       "Sure, I will answer briefly and still collect the key details needed for the estimate.",
   }),
@@ -114,6 +126,8 @@ const QUESTION_ANSWERS = Object.freeze({
     language: "Мы можем продолжить на польском, английском или русском языке.",
     scope:
       "Мы выполняем ремонтно-отделочные работы по недвижимости и не занимаемся покраской автомобилей.",
+    offTopic:
+      "В этом чате я помогаю только с расчетом сметы по ремонтно-отделочным работам, по другим темам не консультируем.",
     generic:
       "Конечно, кратко отвечу и одновременно уточню ключевые данные для точной сметы.",
   }),
@@ -156,14 +170,76 @@ function enforceSalesTone(message, { status, language }) {
   return text;
 }
 
-function buildQuestionAnswer(latestUserMessage, language) {
+function isQuestionLike(message) {
+  return QUESTION_PATTERN.test(message) || QUESTION_WORD_PATTERN.test(message);
+}
+
+function hasProjectSignals(message) {
+  if (!message) {
+    return false;
+  }
+
+  return (
+    AREA_OR_QUANTITY_SIGNAL_PATTERN.test(message) ||
+    PROJECT_SCOPE_SIGNAL_PATTERN.test(message)
+  );
+}
+
+function isLikelyOffTopicMessage({ message, extractedWorks }) {
+  const normalizedMessage = String(message ?? "").trim();
+  const currentWorks = Array.isArray(extractedWorks) ? extractedWorks : [];
+
+  if (!normalizedMessage) {
+    return false;
+  }
+
+  if (SCOPE_QUESTION_PATTERN.test(normalizedMessage)) {
+    return true;
+  }
+
+  if (!isQuestionLike(normalizedMessage)) {
+    return false;
+  }
+
+  if (GREETING_PATTERN.test(normalizedMessage)) {
+    return false;
+  }
+
+  if (
+    PRICE_QUESTION_PATTERN.test(normalizedMessage) ||
+    PROCESS_QUESTION_PATTERN.test(normalizedMessage) ||
+    LANGUAGE_QUESTION_PATTERN.test(normalizedMessage)
+  ) {
+    return false;
+  }
+
+  if (currentWorks.length > 0) {
+    return false;
+  }
+
+  if (hasProjectSignals(normalizedMessage)) {
+    return false;
+  }
+
+  return true;
+}
+
+function buildQuestionAnswer(latestUserMessage, language, { offTopic = false } = {}) {
   const message = String(latestUserMessage ?? "").trim();
-  if (!message || !QUESTION_PATTERN.test(message)) {
+  if (!message) {
     return null;
   }
 
   const normalizedLanguage = normalizeChatLanguage(language, "pl");
   const dictionary = QUESTION_ANSWERS[normalizedLanguage] ?? QUESTION_ANSWERS.pl;
+
+  if (SCOPE_QUESTION_PATTERN.test(message)) {
+    return dictionary.scope;
+  }
+
+  if (!isQuestionLike(message)) {
+    return null;
+  }
 
   if (PRICE_QUESTION_PATTERN.test(message)) {
     return dictionary.price;
@@ -177,20 +253,20 @@ function buildQuestionAnswer(latestUserMessage, language) {
     return dictionary.language;
   }
 
-  if (SCOPE_QUESTION_PATTERN.test(message)) {
-    return dictionary.scope;
+  if (offTopic) {
+    return dictionary.offTopic;
   }
 
-  return dictionary.generic;
+  return null;
 }
 
-function injectQuestionAnswer(message, { latestUserMessage, language }) {
+function injectQuestionAnswer(message, { latestUserMessage, language, offTopic = false }) {
   const base = String(message ?? "").trim();
   if (!base) {
     return base;
   }
 
-  const answer = buildQuestionAnswer(latestUserMessage, language);
+  const answer = buildQuestionAnswer(latestUserMessage, language, { offTopic });
   if (!answer) {
     return base;
   }
@@ -244,6 +320,23 @@ function buildTemplateReply(status, questions, language) {
   return pack.generic;
 }
 
+function buildOffTopicFallback(status, questions, language) {
+  const pack = getLanguagePack(language);
+  const normalizedLanguage = normalizeChatLanguage(language, "pl");
+  const dictionary = QUESTION_ANSWERS[normalizedLanguage] ?? QUESTION_ANSWERS.pl;
+  const scopeReply = dictionary.offTopic ?? dictionary.scope;
+
+  if (status === "ready_for_confirmation") {
+    return `${scopeReply}\n${pack.ready}`;
+  }
+
+  if (questions.length > 0) {
+    return `${scopeReply}\n${pack.clarifying}\n- ${questions.join("\n- ")}`;
+  }
+
+  return `${scopeReply}\n${pack.generic}`;
+}
+
 async function buildAssistantMessage({
   composeAssistantMessage,
   language,
@@ -252,8 +345,11 @@ async function buildAssistantMessage({
   missingFields,
   latestUserMessage,
   estimate,
+  offTopic = false,
 }) {
-  const fallbackMessage = buildTemplateReply(status, questions, language);
+  const fallbackMessage = offTopic
+    ? buildOffTopicFallback(status, questions, language)
+    : buildTemplateReply(status, questions, language);
 
   if (typeof composeAssistantMessage !== "function") {
     return enforceSalesTone(fallbackMessage, { status, language });
@@ -268,6 +364,7 @@ async function buildAssistantMessage({
       fallbackMessage,
       latestUserMessage,
       estimate,
+      offTopic,
     });
 
     const normalized = String(generated ?? "").trim();
@@ -275,6 +372,7 @@ async function buildAssistantMessage({
       const withQuestionAnswer = injectQuestionAnswer(normalized, {
         latestUserMessage,
         language,
+        offTopic,
       });
       return enforceSalesTone(withQuestionAnswer, { status, language });
     }
@@ -285,6 +383,7 @@ async function buildAssistantMessage({
   const fallbackWithQuestionAnswer = injectQuestionAnswer(fallbackMessage, {
     latestUserMessage,
     language,
+    offTopic,
   });
   return enforceSalesTone(fallbackWithQuestionAnswer, { status, language });
 }
@@ -383,6 +482,10 @@ export function createChatAgent({ extractWorks, composeAssistantMessage = null }
 
       const status =
         missingFields.length === 0 ? "ready_for_confirmation" : "needs_clarification";
+      const offTopic = isLikelyOffTopicMessage({
+        message: cleanedMessage,
+        extractedWorks: quantityResolved.works,
+      });
 
       const assistantMessage = await buildAssistantMessage({
         composeAssistantMessage,
@@ -392,6 +495,7 @@ export function createChatAgent({ extractWorks, composeAssistantMessage = null }
         missingFields,
         latestUserMessage: cleanedMessage,
         estimate,
+        offTopic,
       });
 
       const updatedSession = {
