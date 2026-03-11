@@ -70,6 +70,8 @@ export function createOpenAIResponseComposer({
     const safeLanguage = normalizeChatLanguage(language, "pl");
     const confirmButtonLabel =
       CONFIRM_BUTTON_LABEL[safeLanguage] ?? CONFIRM_BUTTON_LABEL.pl;
+    const latestText = String(latestUserMessage ?? "");
+    const userAskedQuestion = /[?？]/u.test(latestText);
 
     const response = await openai.chat.completions.create({
       model,
@@ -86,7 +88,7 @@ export function createOpenAIResponseComposer({
             "Prefer short actionable phrasing and clear next step.",
             "Do not change facts, numbers, status, or required questions.",
             "Do not invent services, discounts, guarantees, deadlines, or prices.",
-            "If the latest user message includes a direct question related to estimate workflow, answer it briefly first.",
+            "If userAskedQuestion is true, first answer that question in one short sentence using knownFacts only.",
             "If the user asks something outside available facts, say a manager will clarify it after confirmation.",
             "If status is ready_for_confirmation, ask for confirmation.",
             "If status is needs_clarification, ask only for missing details.",
@@ -101,13 +103,19 @@ export function createOpenAIResponseComposer({
             status,
             questions: Array.isArray(questions) ? questions : [],
             missingFields: Array.isArray(missingFields) ? missingFields : [],
-            latestUserMessage: String(latestUserMessage ?? ""),
+            latestUserMessage: latestText,
+            userAskedQuestion,
             estimate: estimate
               ? {
                   subtotal: estimate.subtotal,
                   total: estimate.total,
                 }
               : null,
+            knownFacts: [
+              "This is a draft estimate based on described works and quantities.",
+              "Final total may be adjusted after full project details and manager review.",
+              "Confirmation button sends the draft and contact context to a manager.",
+            ],
             ui: {
               confirmButtonLabel,
             },
