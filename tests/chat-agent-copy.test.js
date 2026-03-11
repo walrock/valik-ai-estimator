@@ -31,7 +31,8 @@ test("chat agent uses AI-composed reply when composer returns text", async () =>
     message: "Bathroom 12m2 painting",
   });
 
-  assert.equal(result.response.assistantMessage, "Custom assistant copy");
+  assert.match(result.response.assistantMessage, /Custom assistant copy/);
+  assert.match(result.response.assistantMessage, /Great,/);
 });
 
 test("chat agent falls back to template reply when composer fails", async () => {

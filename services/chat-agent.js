@@ -46,9 +46,62 @@ const PROMPTS = Object.freeze({
   }),
 });
 
+const SALES_STYLE = Object.freeze({
+  pl: Object.freeze({
+    warmPrefix: "Super,",
+    confirmButtonLabel: "Potwierdz wycene",
+    confirmCta:
+      'Jesli wszystko sie zgadza, kliknij "Potwierdz wycene", a przekaze dane do opiekuna.',
+  }),
+  en: Object.freeze({
+    warmPrefix: "Great,",
+    confirmButtonLabel: "Confirm estimate",
+    confirmCta:
+      'If everything looks good, click "Confirm estimate" and I will pass it to a manager.',
+  }),
+  ru: Object.freeze({
+    warmPrefix: "Отлично,",
+    confirmButtonLabel: "Подтвердить смету",
+    confirmCta:
+      'Если все верно, нажмите "Подтвердить смету", и я передам данные менеджеру.',
+  }),
+});
+
 function getLanguagePack(language) {
   const normalizedLanguage = normalizeChatLanguage(language, "pl");
   return PROMPTS[normalizedLanguage] ?? PROMPTS.pl;
+}
+
+function getSalesStyle(language) {
+  const normalizedLanguage = normalizeChatLanguage(language, "pl");
+  return SALES_STYLE[normalizedLanguage] ?? SALES_STYLE.pl;
+}
+
+function enforceSalesTone(message, { status, language }) {
+  const text = String(message ?? "").trim();
+  if (!text) {
+    return text;
+  }
+
+  const style = getSalesStyle(language);
+  const lowered = text.toLowerCase();
+
+  if (status === "ready_for_confirmation") {
+    const hasButtonLabel = lowered.includes(style.confirmButtonLabel.toLowerCase());
+    if (!hasButtonLabel) {
+      return `${text}\n${style.confirmCta}`;
+    }
+    return text;
+  }
+
+  if (status === "needs_clarification") {
+    const prefixLowered = style.warmPrefix.toLowerCase();
+    if (!lowered.startsWith(prefixLowered)) {
+      return `${style.warmPrefix} ${text}`;
+    }
+  }
+
+  return text;
 }
 
 function ensureSessionShape(session) {
@@ -100,7 +153,7 @@ async function buildAssistantMessage({
   const fallbackMessage = buildTemplateReply(status, questions, language);
 
   if (typeof composeAssistantMessage !== "function") {
-    return fallbackMessage;
+    return enforceSalesTone(fallbackMessage, { status, language });
   }
 
   try {
@@ -116,13 +169,13 @@ async function buildAssistantMessage({
 
     const normalized = String(generated ?? "").trim();
     if (normalized) {
-      return normalized;
+      return enforceSalesTone(normalized, { status, language });
     }
   } catch (error) {
     // Use deterministic fallback if AI phrasing fails.
   }
 
-  return fallbackMessage;
+  return enforceSalesTone(fallbackMessage, { status, language });
 }
 
 function buildTransferPayload(session) {
