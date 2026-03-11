@@ -86,6 +86,8 @@ export function createOpenAIResponseComposer({
             "Prefer short actionable phrasing and clear next step.",
             "Do not change facts, numbers, status, or required questions.",
             "Do not invent services, discounts, guarantees, deadlines, or prices.",
+            "If the latest user message includes a direct question related to estimate workflow, answer it briefly first.",
+            "If the user asks something outside available facts, say a manager will clarify it after confirmation.",
             "If status is ready_for_confirmation, ask for confirmation.",
             "If status is needs_clarification, ask only for missing details.",
             "If status is active, ask for project scope details.",

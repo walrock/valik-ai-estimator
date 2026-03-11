@@ -25,6 +25,28 @@ test("clarifier requests demolition context when lift/floor data is absent", () 
   assert.ok(missingFields.includes("floor_number"));
 });
 
+test("clarifier recognizes Russian city names for Polish cities", () => {
+  const missingFields = detectMissingFields({
+    message: "Нужно плитка 6 м2 в гданьске, старт завтра",
+    works: [{ category: "tiling", type: "tile_10_15", quantity: 6 }],
+  });
+
+  assert.ok(!missingFields.includes("city"));
+  assert.ok(!missingFields.includes("deadline"));
+});
+
+test("clarifier recognizes Russian demolition details with city and floor forms", () => {
+  const missingFields = detectMissingFields({
+    message: "Демонтаж 5 м2 в варшаве, на 3 этаже, без лифта, завтра",
+    works: [{ category: "tiling", type: "demolition_no_lift", quantity: 5 }],
+  });
+
+  assert.ok(!missingFields.includes("city"));
+  assert.ok(!missingFields.includes("floor_number"));
+  assert.ok(!missingFields.includes("lift_access"));
+  assert.ok(!missingFields.includes("deadline"));
+});
+
 test("clarifier returns mapped questions for missing fields in Polish", () => {
   const questions = buildClarifyingQuestions(["deadline", "city"], {
     language: "pl",

@@ -1,14 +1,98 @@
 ﻿import { normalizeChatLanguage } from "./language.js";
 
-const AREA_PATTERN =
-  /\b\d+(?:[.,]\d+)?\s*(m2|m\^2|m²|sqm|кв\.?\s*м|квм)\b/i;
-const DEADLINE_PATTERN =
-  /\b(asap|urgent|pilne|szybko|tomorrow|jutro|pojutrze|next week|next month|w tym tygodniu|w przysz(?:ł|l)ym tygodniu|w przysz(?:ł|l)ym miesi(?:ą|a)cu|za\s+\d+\s*(day|days|week|weeks|month|months|dzien|dni|tydzien|tygodnie|tygodni|miesiac|miesiace|miesiecy)|\d+\s*(day|days|week|weeks|month|months)|срочно|завтра|послезавтра|на следующей неделе|на следующем месяце|через\s+\d+\s*(день|дня|дней|недел[яиюе]|месяц|месяца|месяцев))\b/i;
-const FLOOR_PATTERN = /\b\d+\s*(floor|fl|pi(?:e|ę)tro|этаж)\b/i;
-const LIFT_PATTERN =
-  /\b(without?\s+(lift|elevator)|with\s+(lift|elevator)|bez\s+windy|z\s+wind(?:a|ą)|winda|без\s+лифт[ауы]?|с\s+лифт[ауы]?|лифт)\b/i;
-const CITY_PATTERN =
-  /\b(warsaw|warszawa|krakow|kraków|wroclaw|wroc(?:ł|l)aw|gdansk|gdańsk|gdynia|sopot|poznan|poznań|lodz|łódź|berlin|munich|london|paris|moscow|moskva|москва|санкт[-\s]?петербург|питер)\b/i;
+const TOKEN_BOUNDARY_LEFT = String.raw`(?<![\p{L}\p{N}_])`;
+const TOKEN_BOUNDARY_RIGHT = String.raw`(?![\p{L}\p{N}_])`;
+
+const AREA_PATTERN = new RegExp(
+  `${TOKEN_BOUNDARY_LEFT}\\d+(?:[.,]\\d+)?\\s*(?:m2|m\\^2|m²|м2|м\\^2|м²|sqm|кв\\.?\\s*м|квм)${TOKEN_BOUNDARY_RIGHT}`,
+  "iu",
+);
+const DEADLINE_PATTERN = new RegExp(
+  [
+    `${TOKEN_BOUNDARY_LEFT}(?:`,
+    [
+      "asap",
+      "urgent",
+      "pilne",
+      "szybko",
+      "tomorrow",
+      "jutro",
+      "pojutrze",
+      "next week",
+      "next month",
+      "w tym tygodniu",
+      "w przysz(?:ł|l)ym tygodniu",
+      "w przysz(?:ł|l)ym miesi(?:ą|a)cu",
+      "za\\s+\\d+\\s*(?:day|days|week|weeks|month|months|dzien|dni|tydzien|tygodnie|tygodni|miesiac|miesiace|miesiecy)",
+      "\\d+\\s*(?:day|days|week|weeks|month|months)",
+      "срочно",
+      "завтра",
+      "послезавтра",
+      "на следующей неделе",
+      "на следующем месяце",
+      "через\\s+\\d+\\s*(?:день|дня|дней|недел[яиюе]|месяц|месяца|месяцев)",
+    ].join("|"),
+    `)${TOKEN_BOUNDARY_RIGHT}`,
+  ].join(""),
+  "iu",
+);
+const FLOOR_PATTERN = new RegExp(
+  `${TOKEN_BOUNDARY_LEFT}\\d+\\s*(?:floor|fl|pi(?:e|ę)tro|этаж(?:е|а|у)?)${TOKEN_BOUNDARY_RIGHT}`,
+  "iu",
+);
+const LIFT_PATTERN = new RegExp(
+  `${TOKEN_BOUNDARY_LEFT}(?:without?\\s+(?:lift|elevator)|with\\s+(?:lift|elevator)|bez\\s+windy|z\\s+wind(?:a|ą)|winda|без\\s+лифт[ауы]?|с\\s+лифт[ауы]?|лифт)${TOKEN_BOUNDARY_RIGHT}`,
+  "iu",
+);
+const CITY_PATTERN = new RegExp(
+  `${TOKEN_BOUNDARY_LEFT}(?:` +
+    [
+      "warsaw[\\p{L}]*",
+      "warszaw[\\p{L}]*",
+      "варшав[\\p{L}]*",
+      "krakow[\\p{L}]*",
+      "kraków[\\p{L}]*",
+      "краков[\\p{L}]*",
+      "wroclaw[\\p{L}]*",
+      "wroc(?:ł|l)aw[\\p{L}]*",
+      "вроцлав[\\p{L}]*",
+      "gdansk[\\p{L}]*",
+      "gda(?:ń|n)sk[\\p{L}]*",
+      "гдань?ск[\\p{L}]*",
+      "gdyni[\\p{L}]*",
+      "гдын[\\p{L}]*",
+      "sopot[\\p{L}]*",
+      "сопот[\\p{L}]*",
+      "poznan[\\p{L}]*",
+      "poznań[\\p{L}]*",
+      "познан[\\p{L}]*",
+      "lodz[\\p{L}]*",
+      "łódź[\\p{L}]*",
+      "лодз[\\p{L}]*",
+      "trojmiast[\\p{L}]*",
+      "trójmiast[\\p{L}]*",
+      "троймяст[\\p{L}]*",
+      "berlin[\\p{L}]*",
+      "берлин[\\p{L}]*",
+      "munich[\\p{L}]*",
+      "m[üu]nchen[\\p{L}]*",
+      "мюнхен[\\p{L}]*",
+      "london[\\p{L}]*",
+      "лондон[\\p{L}]*",
+      "paris[\\p{L}]*",
+      "pary(?:ż|z)[\\p{L}]*",
+      "париж[\\p{L}]*",
+      "moscow[\\p{L}]*",
+      "moskva[\\p{L}]*",
+      "москв[\\p{L}]*",
+      "saint[-\\s]?petersburg",
+      "st\\.?\\s?petersburg",
+      "санкт[-\\s]?петербург",
+      "питер[\\p{L}]*",
+    ].join("|") +
+    `)${TOKEN_BOUNDARY_RIGHT}`,
+  "iu",
+);
 
 const DEMOLITION_TYPES = new Set(["demolition_no_lift", "demolition_with_lift"]);
 
