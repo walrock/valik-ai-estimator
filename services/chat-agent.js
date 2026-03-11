@@ -67,6 +67,44 @@ const SALES_STYLE = Object.freeze({
   }),
 });
 
+const QUESTION_PATTERN = /[?？]/u;
+const PRICE_QUESTION_PATTERN =
+  /(?:\bprice\b|\bcost\b|\bcena\b|\bkoszt\b|wycen|цен|стоим|сколько)/i;
+const PROCESS_QUESTION_PATTERN =
+  /(?:what next|how (?:it )?works|after confirmation|co dalej|jak to dzia(?:ł|l)a|po potwierdzeniu|как это работает|что дальше|после подтверж)/i;
+const LANGUAGE_QUESTION_PATTERN =
+  /(?:language|english|polish|russian|język|po polsku|по-рус|на каком языке)/i;
+
+const QUESTION_ANSWERS = Object.freeze({
+  pl: Object.freeze({
+    price:
+      "Cene liczymy na podstawie zakresu prac i ilosci, a finalna kwote potwierdza opiekun.",
+    process:
+      "Po potwierdzeniu przekazuje wycene do opiekuna, ktory kontaktuje sie z Toba i dopina szczegoly.",
+    language: "Mozemy kontynuowac rozmowe po polsku, angielsku lub rosyjsku.",
+    generic:
+      "Jasne, odpowiem krotko i jednoczesnie dopytam o dane potrzebne do wyceny.",
+  }),
+  en: Object.freeze({
+    price:
+      "Pricing is calculated from work scope and quantities, then finalized by a manager after review.",
+    process:
+      "After confirmation, I pass the draft estimate to a manager who contacts you to finalize details.",
+    language: "We can continue in Polish, English, or Russian.",
+    generic:
+      "Sure, I will answer briefly and still collect the key details needed for the estimate.",
+  }),
+  ru: Object.freeze({
+    price:
+      "Цена считается по видам работ и объему, а финальную сумму подтверждает менеджер после проверки.",
+    process:
+      "После подтверждения я передаю черновую смету менеджеру, и он связывается с вами для финальных деталей.",
+    language: "Мы можем продолжить на польском, английском или русском языке.",
+    generic:
+      "Конечно, кратко отвечу и одновременно уточню ключевые данные для точной сметы.",
+  }),
+});
+
 function getLanguagePack(language) {
   const normalizedLanguage = normalizeChatLanguage(language, "pl");
   return PROMPTS[normalizedLanguage] ?? PROMPTS.pl;
@@ -102,6 +140,49 @@ function enforceSalesTone(message, { status, language }) {
   }
 
   return text;
+}
+
+function buildQuestionAnswer(latestUserMessage, language) {
+  const message = String(latestUserMessage ?? "").trim();
+  if (!message || !QUESTION_PATTERN.test(message)) {
+    return null;
+  }
+
+  const normalizedLanguage = normalizeChatLanguage(language, "pl");
+  const dictionary = QUESTION_ANSWERS[normalizedLanguage] ?? QUESTION_ANSWERS.pl;
+
+  if (PRICE_QUESTION_PATTERN.test(message)) {
+    return dictionary.price;
+  }
+
+  if (PROCESS_QUESTION_PATTERN.test(message)) {
+    return dictionary.process;
+  }
+
+  if (LANGUAGE_QUESTION_PATTERN.test(message)) {
+    return dictionary.language;
+  }
+
+  return dictionary.generic;
+}
+
+function injectQuestionAnswer(message, { latestUserMessage, language }) {
+  const base = String(message ?? "").trim();
+  if (!base) {
+    return base;
+  }
+
+  const answer = buildQuestionAnswer(latestUserMessage, language);
+  if (!answer) {
+    return base;
+  }
+
+  const loweredBase = base.toLowerCase();
+  if (loweredBase.includes(answer.toLowerCase())) {
+    return base;
+  }
+
+  return `${answer}\n${base}`;
 }
 
 function ensureSessionShape(session) {
@@ -169,13 +250,21 @@ async function buildAssistantMessage({
 
     const normalized = String(generated ?? "").trim();
     if (normalized) {
-      return enforceSalesTone(normalized, { status, language });
+      const withQuestionAnswer = injectQuestionAnswer(normalized, {
+        latestUserMessage,
+        language,
+      });
+      return enforceSalesTone(withQuestionAnswer, { status, language });
     }
   } catch (error) {
     // Use deterministic fallback if AI phrasing fails.
   }
 
-  return enforceSalesTone(fallbackMessage, { status, language });
+  const fallbackWithQuestionAnswer = injectQuestionAnswer(fallbackMessage, {
+    latestUserMessage,
+    language,
+  });
+  return enforceSalesTone(fallbackWithQuestionAnswer, { status, language });
 }
 
 function buildTransferPayload(session) {

@@ -23,7 +23,7 @@ test("chat agent uses AI-composed reply when composer returns text", async () =>
     warnings: [],
     estimate: null,
     confirmedAt: null,
-    language: "pl",
+    language: "en",
   };
 
   const result = await agent.processMessage({
@@ -33,6 +33,40 @@ test("chat agent uses AI-composed reply when composer returns text", async () =>
 
   assert.match(result.response.assistantMessage, /Custom assistant copy/);
   assert.match(result.response.assistantMessage, /Great,/);
+});
+
+test("chat agent adds direct answer for pricing questions before clarification", async () => {
+  const extractWorks = createStaticExtractor(() => ({ works: [] }));
+  const composeAssistantMessage = async () => "I need a few more details.";
+  const agent = createChatAgent({ extractWorks, composeAssistantMessage });
+
+  const session = {
+    sessionId: "session-qa-1",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    status: "active",
+    works: [],
+    missingFields: [],
+    lastUserMessage: "",
+    userMessages: [],
+    questions: [],
+    warnings: [],
+    estimate: null,
+    confirmedAt: null,
+    language: "en",
+  };
+
+  const result = await agent.processMessage({
+    session,
+    message: "How is price calculated?",
+  });
+
+  assert.equal(result.response.language, "en");
+  assert.match(
+    result.response.assistantMessage,
+    /Pricing is calculated from work scope and quantities/i,
+  );
+  assert.match(result.response.assistantMessage, /I need a few more details/i);
 });
 
 test("chat agent falls back to template reply when composer fails", async () => {
