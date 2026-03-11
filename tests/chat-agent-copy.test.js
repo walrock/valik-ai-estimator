@@ -100,3 +100,79 @@ test("chat agent falls back to template reply when composer fails", async () => 
   assert.equal(result.response.language, "en");
   assert.match(result.response.assistantMessage, /I need a few more details/i);
 });
+
+test("chat agent handles service scope questions in Russian", async () => {
+  const extractWorks = createStaticExtractor(() => ({ works: [] }));
+  const composeAssistantMessage = async () => "Черновая смета готова.";
+  const agent = createChatAgent({ extractWorks, composeAssistantMessage });
+
+  const session = {
+    sessionId: "session-scope-1",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    status: "active",
+    works: [{ category: "painting", type: "paint_2_layers", quantity: 10 }],
+    missingFields: [],
+    lastUserMessage: "",
+    userMessages: [],
+    questions: [],
+    warnings: [],
+    estimate: {
+      subtotal: 250,
+      total: 1000,
+      breakdown: [],
+      warnings: [],
+      appliedRules: ["minimum_order"],
+    },
+    confirmedAt: null,
+    language: "ru",
+  };
+
+  const result = await agent.processMessage({
+    session,
+    message: "А машины вы красите?",
+  });
+
+  assert.equal(result.response.language, "ru");
+  assert.match(result.response.assistantMessage, /не занимаемся покраской автомобилей/i);
+});
+
+test("chat agent keeps session confirmed after additional user messages", async () => {
+  const extractWorks = createStaticExtractor(() => ({
+    works: [{ category: "tiling", type: "tile_10_15", quantity: 5 }],
+  }));
+  const composeAssistantMessage = async () => "Should not be used";
+  const agent = createChatAgent({ extractWorks, composeAssistantMessage });
+
+  const session = {
+    sessionId: "session-confirmed-1",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    status: "confirmed",
+    works: [{ category: "painting", type: "paint_2_layers", quantity: 20 }],
+    missingFields: [],
+    lastUserMessage: "",
+    userMessages: ["old message"],
+    questions: [],
+    warnings: [],
+    estimate: {
+      subtotal: 500,
+      total: 1000,
+      breakdown: [],
+      warnings: [],
+      appliedRules: ["minimum_order"],
+    },
+    confirmedAt: new Date().toISOString(),
+    language: "ru",
+  };
+
+  const result = await agent.processMessage({
+    session,
+    message: "а машины вы красите?",
+  });
+
+  assert.equal(result.response.status, "confirmed");
+  assert.equal(result.response.language, "ru");
+  assert.match(result.response.assistantMessage, /уже подтверждена/i);
+  assert.deepEqual(result.response.missingFields, []);
+});

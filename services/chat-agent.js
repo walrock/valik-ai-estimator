@@ -20,6 +20,8 @@ const PROMPTS = Object.freeze({
       "Opisz zakres prac, powierzchnie/ilosci, miasto i preferowany termin realizacji.",
     ready:
       "Wstepna wycena jest gotowa. Jesli wszystko sie zgadza, kliknij \"Potwierdz wycene\", a przekaze dane do opiekuna.",
+    confirmed:
+      "Wycena jest juz potwierdzona i przekazana do opiekuna. Aby przygotowac nowa wycene, rozpocznij nowa rozmowe.",
     clarifying:
       "Super, zeby przygotowac dokladna wycene, potrzebuje jeszcze kilku informacji:",
     generic:
@@ -30,6 +32,8 @@ const PROMPTS = Object.freeze({
       "Describe required works, area/quantity, city and preferred timeline.",
     ready:
       "The draft estimate is ready. If everything looks good, click \"Confirm estimate\" and I will pass it to a manager.",
+    confirmed:
+      "This estimate is already confirmed and handed over to a manager. To prepare a new one, please start a new chat.",
     clarifying:
       "Great, I need a few more details to complete an accurate estimate:",
     generic:
@@ -39,6 +43,8 @@ const PROMPTS = Object.freeze({
     initial: "Опишите работы, площадь/количество, город и желаемые сроки.",
     ready:
       "Черновая смета готова. Если все верно, нажмите \"Подтвердить смету\", и я передам данные менеджеру.",
+    confirmed:
+      "Эта смета уже подтверждена и передана менеджеру. Чтобы сделать новую смету, начните новый диалог.",
     clarifying:
       "Отлично, чтобы подготовить точную смету, мне нужно еще несколько деталей:",
     generic:
@@ -74,6 +80,8 @@ const PROCESS_QUESTION_PATTERN =
   /(?:what next|how (?:it )?works|after confirmation|co dalej|jak to dzia(?:ł|l)a|po potwierdzeniu|как это работает|что дальше|после подтверж)/i;
 const LANGUAGE_QUESTION_PATTERN =
   /(?:language|english|polish|russian|język|po polsku|по-рус|на каком языке)/i;
+const SCOPE_QUESTION_PATTERN =
+  /(?:car|cars|automotive|машин|авто|samochod|samochody)/i;
 
 const QUESTION_ANSWERS = Object.freeze({
   pl: Object.freeze({
@@ -82,6 +90,8 @@ const QUESTION_ANSWERS = Object.freeze({
     process:
       "Po potwierdzeniu przekazuje wycene do opiekuna, ktory kontaktuje sie z Toba i dopina szczegoly.",
     language: "Mozemy kontynuowac rozmowe po polsku, angielsku lub rosyjsku.",
+    scope:
+      "Wykonujemy prace remontowo-wykonczeniowe w nieruchomosciach, nie realizujemy lakierowania samochodow.",
     generic:
       "Jasne, odpowiem krotko i jednoczesnie dopytam o dane potrzebne do wyceny.",
   }),
@@ -91,6 +101,8 @@ const QUESTION_ANSWERS = Object.freeze({
     process:
       "After confirmation, I pass the draft estimate to a manager who contacts you to finalize details.",
     language: "We can continue in Polish, English, or Russian.",
+    scope:
+      "We handle renovation and finishing works for properties; we do not provide car painting services.",
     generic:
       "Sure, I will answer briefly and still collect the key details needed for the estimate.",
   }),
@@ -100,6 +112,8 @@ const QUESTION_ANSWERS = Object.freeze({
     process:
       "После подтверждения я передаю черновую смету менеджеру, и он связывается с вами для финальных деталей.",
     language: "Мы можем продолжить на польском, английском или русском языке.",
+    scope:
+      "Мы выполняем ремонтно-отделочные работы по недвижимости и не занимаемся покраской автомобилей.",
     generic:
       "Конечно, кратко отвечу и одновременно уточню ключевые данные для точной сметы.",
   }),
@@ -163,6 +177,10 @@ function buildQuestionAnswer(latestUserMessage, language) {
     return dictionary.language;
   }
 
+  if (SCOPE_QUESTION_PATTERN.test(message)) {
+    return dictionary.scope;
+  }
+
   return dictionary.generic;
 }
 
@@ -210,6 +228,10 @@ function ensureSessionShape(session) {
 
 function buildTemplateReply(status, questions, language) {
   const pack = getLanguagePack(language);
+
+  if (status === "confirmed") {
+    return pack.confirmed;
+  }
 
   if (status === "ready_for_confirmation") {
     return pack.ready;
@@ -304,6 +326,34 @@ export function createChatAgent({ extractWorks, composeAssistantMessage = null }
         detectedLanguage ?? safeSession.language,
         "pl",
       );
+
+      if (safeSession.status === "confirmed") {
+        const userMessages = [...safeSession.userMessages, cleanedMessage];
+        const assistantMessage = buildTemplateReply("confirmed", [], language);
+        const updatedSession = {
+          ...safeSession,
+          updatedAt: nowIso(),
+          lastUserMessage: cleanedMessage,
+          userMessages,
+          language,
+          status: "confirmed",
+        };
+
+        return {
+          session: updatedSession,
+          response: {
+            sessionId: updatedSession.sessionId,
+            status: "confirmed",
+            assistantMessage,
+            questions: [],
+            missingFields: [],
+            warnings: updatedSession.warnings,
+            works: updatedSession.works,
+            estimate: updatedSession.estimate,
+            language,
+          },
+        };
+      }
 
       const extraction = await extractWorks(cleanedMessage);
       const normalized = normalizeWorks(extraction.works);

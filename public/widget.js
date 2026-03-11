@@ -39,7 +39,7 @@ function normalizeAssistantMessage(text) {
     return raw;
   }
 
-  const withBullets = raw.replace(/\s*•\s*/g, "\n- ");
+  const withBullets = raw.replace(/\s*[\u2022\u00b7]\s*/g, "\n- ");
   const inlineHyphenCount = (withBullets.match(/\s-\s/g) ?? []).length;
   if (inlineHyphenCount >= 2 && !withBullets.includes("\n- ")) {
     return withBullets.replace(/\s-\s/g, "\n- ");
@@ -162,7 +162,8 @@ async function handleConfirm() {
       sendToCrm: false,
     });
 
-    setStatus(payload.status);
+    state.status = payload.status ?? "confirmed";
+    setStatus(state.status);
     appendMessage(
       "Wycena zostala potwierdzona i jest gotowa do przekazania opiekunowi.",
       "assistant",
@@ -178,7 +179,7 @@ async function handleConfirm() {
   } catch (error) {
     appendMessage(`Blad potwierdzenia: ${error.message}`, "assistant");
   } finally {
-    confirmBtn.disabled = false;
+    confirmBtn.disabled = state.status !== "ready_for_confirmation";
   }
 }
 
