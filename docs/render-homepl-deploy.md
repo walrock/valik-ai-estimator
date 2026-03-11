@@ -47,6 +47,10 @@ Optional integrations:
 - `ALERT_API_KEY`
 - `ALERT_SIGNING_SECRET`
 
+If you route confirmed estimates into n8n/Make (Google Sheets/Airtable + Telegram),
+use this guide:
+- [`crm-automation-n8n-make.md`](./crm-automation-n8n-make.md)
+
 Example `CORS_ALLOWLIST`:
 
 ```txt

@@ -25,6 +25,8 @@ CRM integration:
 
 - `CRM_WEBHOOK_URL`
 - `CRM_API_KEY` (if required by CRM endpoint)
+- Widget confirm action sends with `sendToCrm=true` by default.
+- For n8n/Make automation setup, see [`crm-automation-n8n-make.md`](./crm-automation-n8n-make.md).
 
 Alerting:
 

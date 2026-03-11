@@ -175,15 +175,32 @@ async function handleConfirm() {
   try {
     const payload = await postJson("/api/estimate/confirm", {
       sessionId: state.sessionId,
-      sendToCrm: false,
+      sendToCrm: true,
     });
 
     state.status = payload.status ?? "confirmed";
     setStatus(state.status);
-    appendMessage(
-      "Wycena zostala potwierdzona i jest gotowa do przekazania opiekunowi.",
-      "assistant",
-    );
+
+    const crmStatus = String(
+      payload?.crmResult?.status ?? payload?.crmResult?.mode ?? "unknown",
+    ).toLowerCase();
+    let confirmationCopy =
+      "Wycena zostala potwierdzona i jest gotowa do przekazania opiekunowi.";
+
+    if (crmStatus === "sent") {
+      confirmationCopy = "Wycena zostala potwierdzona i wyslana do CRM/opiekuna.";
+    } else if (crmStatus === "pending") {
+      confirmationCopy =
+        "Wycena zostala potwierdzona. Wysylka do CRM jest w kolejce i bedzie ponawiana automatycznie.";
+    } else if (crmStatus === "failed") {
+      confirmationCopy =
+        "Wycena zostala potwierdzona, ale wysylka do CRM nie powiodla sie. System bedzie ponawial probe.";
+    } else if (crmStatus === "not_configured") {
+      confirmationCopy =
+        "Wycena zostala potwierdzona, ale CRM_WEBHOOK_URL nie jest skonfigurowany.";
+    }
+
+    appendMessage(confirmationCopy, "assistant");
 
     crmResultEl.innerHTML = `
       <strong>CRM DTO (podglad):</strong>
@@ -191,6 +208,7 @@ async function handleConfirm() {
       <div>miasto: ${payload.crmLead.customer.city ?? "brak"}</div>
       <div>termin: ${payload.crmLead.customer.timeline ?? "brak"}</div>
       <div>lacznie: ${payload.crmLead.estimate.total} ${payload.crmLead.estimate.currency}</div>
+      <div>delivery: ${payload?.crmResult?.status ?? payload?.crmResult?.mode ?? "unknown"}</div>
     `;
   } catch (error) {
     appendMessage(`Blad potwierdzenia: ${error.message}`, "assistant");
