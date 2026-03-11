@@ -67,6 +67,16 @@ test("clarifier recognizes numeric deadline date formats with keyword", () => {
   assert.ok(!missingFields.includes("deadline"));
 });
 
+test("clarifier recognizes conversational Russian timeline phrases", () => {
+  const missingFields = detectMissingFields({
+    message: "покраска стен 20м2, гданьск, начать можно сейчас, срок пару дней",
+    works: [{ category: "painting", type: "paint_2_layers", quantity: 20 }],
+  });
+
+  assert.ok(!missingFields.includes("city"));
+  assert.ok(!missingFields.includes("deadline"));
+});
+
 test("clarifier returns mapped questions for missing fields in Polish", () => {
   const questions = buildClarifyingQuestions(["deadline", "city"], {
     language: "pl",

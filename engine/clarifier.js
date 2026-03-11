@@ -32,12 +32,18 @@ const DEADLINE_PATTERN = new RegExp(
       "za\\s+\\d+\\s*(?:day|days|week|weeks|month|months|dzien|dni|tydzien|tygodnie|tygodni|miesiac|miesiace|miesiecy)",
       "\\d+\\s*(?:day|days|week|weeks|month|months)",
       "срочно",
+      "сегодня",
+      "сейчас",
+      "прямо\\s+сейчас",
+      "как\\s+можно\\s+скорее",
+      "в\\s+ближайшие\\s+дни",
       "завтра",
       "послезавтра",
       "на следующей неделе",
       "на следующем месяце",
       "через\\s+\\d+\\s*(?:день|дня|дней|недел[яиюе]|месяц|месяца|месяцев)",
       "(?:срок|скрок|deadline|termin|start(?:\\s+date)?|rozpoczecie|rozpoczecia)\\s*[:\\-]?\\s*\\d+\\s*(?:day|days|week|weeks|month|months|dzien|dni|tydzien|tygodnie|tygodni|miesiac|miesiace|miesiecy|день|дня|дней|недел[яиюе]|месяц|месяца|месяцев)",
+      "(?:срок|скрок)\\s*[:\\-]?\\s*(?:пару|пара|несколько)\\s*(?:дней|недель|месяцев)",
       "(?:с|со|od|from)\\s+\\d{1,2}\\s*(?:" +
         RU_MONTH_PATTERN +
         "|" +
