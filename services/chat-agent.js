@@ -19,22 +19,30 @@ const PROMPTS = Object.freeze({
     initial:
       "Opisz zakres prac, powierzchnie/ilosci, miasto i preferowany termin realizacji.",
     ready:
-      "Wstepna wycena jest gotowa. Potwierdz, jesli moge przekazac ja do opiekuna.",
-    clarifying: "Potrzebuje jeszcze kilku informacji, aby dokonczyc wycene:",
-    generic: "Podaj prosze wiecej szczegolow o zakresie prac i ilosciach.",
+      "Wstepna wycena jest gotowa. Jesli wszystko sie zgadza, kliknij \"Potwierdz wycene\", a przekaze dane do opiekuna.",
+    clarifying:
+      "Super, zeby przygotowac dokladna wycene, potrzebuje jeszcze kilku informacji:",
+    generic:
+      "Podaj prosze troche wiecej szczegolow o zakresie prac i ilosciach, a przygotuje dokladniejsza wycene.",
   }),
   en: Object.freeze({
     initial:
       "Describe required works, area/quantity, city and preferred timeline.",
-    ready: "The draft estimate is ready. Confirm if I can pass it to a manager.",
-    clarifying: "I need a few more details to complete the estimate:",
-    generic: "Please provide more details about works and quantities.",
+    ready:
+      "The draft estimate is ready. If everything looks good, click \"Confirm estimate\" and I will pass it to a manager.",
+    clarifying:
+      "Great, I need a few more details to complete an accurate estimate:",
+    generic:
+      "Please share a few more details about works and quantities, and I will prepare a more accurate estimate.",
   }),
   ru: Object.freeze({
     initial: "Опишите работы, площадь/количество, город и желаемые сроки.",
-    ready: "Черновая смета готова. Подтвердите, и я передам ее менеджеру.",
-    clarifying: "Мне нужно еще несколько деталей, чтобы завершить смету:",
-    generic: "Пожалуйста, уточните работы и объемы.",
+    ready:
+      "Черновая смета готова. Если все верно, нажмите \"Подтвердить смету\", и я передам данные менеджеру.",
+    clarifying:
+      "Отлично, чтобы подготовить точную смету, мне нужно еще несколько деталей:",
+    generic:
+      "Пожалуйста, уточните работы и объемы, и я подготовлю более точную смету.",
   }),
 });
 

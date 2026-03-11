@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+﻿import OpenAI from "openai";
 import { normalizeChatLanguage } from "../engine/language.js";
 
 function toBoolean(value, fallback = true) {
@@ -33,8 +33,14 @@ function trimToLength(text, limit) {
     return text;
   }
 
-  return `${text.slice(0, Math.max(0, limit - 1)).trimEnd()}…`;
+  return `${text.slice(0, Math.max(0, limit - 3)).trimEnd()}...`;
 }
+
+const CONFIRM_BUTTON_LABEL = Object.freeze({
+  pl: "Potwierdz wycene",
+  en: "Confirm estimate",
+  ru: "Подтвердить смету",
+});
 
 export function createOpenAIResponseComposer({
   apiKey = process.env.OPENAI_API_KEY,
@@ -62,6 +68,8 @@ export function createOpenAIResponseComposer({
     estimate,
   }) {
     const safeLanguage = normalizeChatLanguage(language, "pl");
+    const confirmButtonLabel =
+      CONFIRM_BUTTON_LABEL[safeLanguage] ?? CONFIRM_BUTTON_LABEL.pl;
 
     const response = await openai.chat.completions.create({
       model,
@@ -73,11 +81,15 @@ export function createOpenAIResponseComposer({
             "You write customer-facing messages for a renovation estimate assistant.",
             "Return plain text only.",
             "Use the requested language code exactly: pl, en or ru.",
+            "Tone: warm, professional, consultative, conversion-focused.",
             "Keep message concise and natural (1-4 short lines).",
+            "Prefer short actionable phrasing and clear next step.",
             "Do not change facts, numbers, status, or required questions.",
+            "Do not invent services, discounts, guarantees, deadlines, or prices.",
             "If status is ready_for_confirmation, ask for confirmation.",
             "If status is needs_clarification, ask only for missing details.",
             "If status is active, ask for project scope details.",
+            "If status is ready_for_confirmation, include explicit CTA with provided confirm button label.",
           ].join("\n"),
         },
         {
@@ -94,6 +106,9 @@ export function createOpenAIResponseComposer({
                   total: estimate.total,
                 }
               : null,
+            ui: {
+              confirmButtonLabel,
+            },
             fallbackMessage: String(fallbackMessage ?? ""),
           }),
         },

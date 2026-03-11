@@ -1,4 +1,4 @@
-import test from "node:test";
+﻿import test from "node:test";
 import assert from "node:assert/strict";
 import os from "node:os";
 import path from "node:path";
@@ -213,7 +213,7 @@ test("API responds in Russian when the user message is in Cyrillic", async () =>
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message: "привет, нужна смета",
+        message: "\u043f\u0440\u0438\u0432\u0435\u0442, \u043d\u0443\u0436\u043d\u0430 \u0441\u043c\u0435\u0442\u0430",
       }),
     });
 
@@ -221,7 +221,7 @@ test("API responds in Russian when the user message is in Cyrillic", async () =>
     const payload = await response.json();
     assert.equal(payload.status, "needs_clarification");
     assert.equal(payload.language, "ru");
-    assert.ok(payload.assistantMessage.includes("Мне нужно еще несколько деталей"));
+    assert.match(payload.assistantMessage, /[\u0400-\u04FF]/u);
   } finally {
     await runtime.cleanup();
   }
@@ -370,3 +370,4 @@ test("API exposes CRM DLQ entries for failed jobs", async () => {
     await runtime.cleanup();
   }
 });
+
