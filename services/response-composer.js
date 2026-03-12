@@ -97,7 +97,7 @@ export function createOpenAIResponseComposer({
             "When mustCollectDetails is true, always end with a data request block and include the provided questions as bullet points.",
             "Use each question from the provided questions list exactly, do not rewrite them.",
             "If status is ready_for_confirmation, ask for confirmation.",
-            "If status is ready_for_confirmation, also invite user to leave a message or phone number for follow-up questions.",
+            "If status is ready_for_confirmation, also invite user to leave a message, phone number, or email for follow-up questions.",
             "If status is needs_clarification, ask only for missing details.",
             "If status is active, ask for project scope details.",
             "If status is ready_for_confirmation, include explicit CTA with provided confirm button label.",

@@ -202,11 +202,18 @@ async function handleConfirm() {
 
     appendMessage(confirmationCopy, "assistant");
 
+    const crmCustomer = payload?.crmLead?.customer ?? {};
+    const contactSummary = [crmCustomer.phone, crmCustomer.email]
+      .filter(Boolean)
+      .join(" / ");
+
     crmResultEl.innerHTML = `
       <strong>CRM DTO (podglad):</strong>
       <div>sessionId: ${payload.crmLead.sessionId}</div>
-      <div>miasto: ${payload.crmLead.customer.city ?? "brak"}</div>
-      <div>termin: ${payload.crmLead.customer.timeline ?? "brak"}</div>
+      <div>miasto: ${crmCustomer.city ?? "brak"}</div>
+      <div>termin: ${crmCustomer.timeline ?? "brak"}</div>
+      <div>kontakt: ${contactSummary || "brak"}</div>
+      <div>notatka: ${crmCustomer.note ?? "brak"}</div>
       <div>lacznie: ${payload.crmLead.estimate.total} ${payload.crmLead.estimate.currency}</div>
       <div>delivery: ${payload?.crmResult?.status ?? payload?.crmResult?.mode ?? "unknown"}</div>
     `;

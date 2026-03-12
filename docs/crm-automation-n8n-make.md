@@ -31,6 +31,9 @@ Keep these already configured:
 - `status`
 - `customer.city`
 - `customer.timeline`
+- `customer.phone`
+- `customer.email`
+- `customer.note`
 - `missingFields[]`
 - `warnings[]`
 - `transcript[]`
@@ -82,6 +85,9 @@ Map fields exactly from incoming JSON:
 - `sessionId`
 - `customer.city`
 - `customer.timeline`
+- `customer.phone`
+- `customer.email`
+- `customer.note`
 - `estimate.total`
 - `estimate.currency`
 - `createdAt`
