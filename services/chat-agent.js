@@ -19,7 +19,7 @@ const PROMPTS = Object.freeze({
     initial:
       "Opisz zakres prac, powierzchnie/ilosci i preferowany termin realizacji.",
     ready:
-      "Wstepna wycena jest gotowa. Jesli wszystko sie zgadza, kliknij \"Potwierdz wycene\", a przekaze dane do opiekuna.",
+      "Wstepna wycena jest gotowa. Jesli wszystko sie zgadza, kliknij \"Potwierdz wycene\", a przekaze dane do opiekuna. Jesli masz dodatkowe pytania, zostaw wiadomosc lub numer telefonu, a oddzwonimy.",
     confirmed:
       "Wycena jest juz potwierdzona i przekazana do opiekuna. Aby przygotowac nowa wycene, rozpocznij nowa rozmowe.",
     clarifying:
@@ -31,7 +31,7 @@ const PROMPTS = Object.freeze({
     initial:
       "Describe required works, area/quantity, and preferred timeline.",
     ready:
-      "The draft estimate is ready. If everything looks good, click \"Confirm estimate\" and I will pass it to a manager.",
+      "The draft estimate is ready. If everything looks good, click \"Confirm estimate\" and I will pass it to a manager. If you have more questions, leave a message or phone number and we will call you back.",
     confirmed:
       "This estimate is already confirmed and handed over to a manager. To prepare a new one, please start a new chat.",
     clarifying:
@@ -42,7 +42,7 @@ const PROMPTS = Object.freeze({
   ru: Object.freeze({
     initial: "Опишите работы, площадь/количество и желаемые сроки.",
     ready:
-      "Черновая смета готова. Если все верно, нажмите \"Подтвердить смету\", и я передам данные менеджеру.",
+      "Черновая смета готова. Если все верно, нажмите \"Подтвердить смету\", и я передам данные менеджеру. Если есть вопросы, оставьте сообщение или номер телефона, и мы перезвоним.",
     confirmed:
       "Эта смета уже подтверждена и передана менеджеру. Чтобы сделать новую смету, начните новый диалог.",
     clarifying:
@@ -56,17 +56,23 @@ const SALES_STYLE = Object.freeze({
   pl: Object.freeze({
     confirmButtonLabel: "Potwierdz wycene",
     confirmCta:
-      'Jesli wszystko sie zgadza, kliknij "Potwierdz wycene", a przekaze dane do opiekuna.',
+      'Jesli wszystko sie zgadza, kliknij "Potwierdz wycene", a przekaze dane do opiekuna. Jesli masz dodatkowe pytania, zostaw wiadomosc lub numer telefonu, a oddzwonimy.',
+    contactHint:
+      "Jesli masz dodatkowe pytania, zostaw wiadomosc lub numer telefonu, a oddzwonimy.",
   }),
   en: Object.freeze({
     confirmButtonLabel: "Confirm estimate",
     confirmCta:
-      'If everything looks good, click "Confirm estimate" and I will pass it to a manager.',
+      'If everything looks good, click "Confirm estimate" and I will pass it to a manager. If you have more questions, leave a message or phone number and we will call you back.',
+    contactHint:
+      "If you have more questions, leave a message or phone number and we will call you back.",
   }),
   ru: Object.freeze({
     confirmButtonLabel: "Подтвердить смету",
     confirmCta:
-      'Если все верно, нажмите "Подтвердить смету", и я передам данные менеджеру.',
+      'Если все верно, нажмите "Подтвердить смету", и я передам данные менеджеру. Если есть вопросы, оставьте сообщение или номер телефона, и мы перезвоним.',
+    contactHint:
+      "Если есть вопросы, оставьте сообщение или номер телефона, и мы перезвоним.",
   }),
 });
 
@@ -151,8 +157,13 @@ function enforceSalesTone(message, { status, language }) {
 
   if (status === "ready_for_confirmation") {
     const hasButtonLabel = lowered.includes(style.confirmButtonLabel.toLowerCase());
+    const contactHint = style.contactHint ? style.contactHint.toLowerCase() : "";
+    const hasContactHint = contactHint ? lowered.includes(contactHint) : false;
     if (!hasButtonLabel) {
       return `${text}\n${style.confirmCta}`;
+    }
+    if (contactHint && !hasContactHint) {
+      return `${text}\n${style.contactHint}`;
     }
     return text;
   }
