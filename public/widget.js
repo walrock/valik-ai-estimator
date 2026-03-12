@@ -2,13 +2,136 @@ const state = {
   sessionId: null,
   status: "active",
   lastEstimate: null,
+  language: "pl",
 };
 
-const STATUS_LABELS = Object.freeze({
-  active: "aktywna",
-  needs_clarification: "wymaga doprecyzowania",
-  ready_for_confirmation: "gotowa do potwierdzenia",
-  confirmed: "potwierdzona",
+const LANGUAGE_PACKS = Object.freeze({
+  pl: Object.freeze({
+    statusLabel: "Status",
+    status: Object.freeze({
+      active: "aktywna",
+      needs_clarification: "wymaga doprecyzowania",
+      ready_for_confirmation: "gotowa do potwierdzenia",
+      confirmed: "potwierdzona",
+    }),
+    estimateLabel: "Wycena",
+    estimateTotalLabel: "Lacznie",
+    estimateNotReady: "pojawi sie po uzupelnieniu kluczowych informacji",
+    warningsLabel: "Uwagi",
+    sendLabel: "Wyslij",
+    confirmLabel: "Potwierdz wycene",
+    placeholder:
+      "Np. Lazienka 6m2, skucie starych plytek, plytki 60x60...",
+    crmTitle: "CRM DTO (podglad)",
+    crmPreviewTitle: "CRM DTO",
+    crmAvailableAfter: "dostepne po potwierdzeniu",
+    crmFields: Object.freeze({
+      sessionId: "sessionId",
+      city: "miasto",
+      contact: "kontakt",
+      note: "notatka",
+      total: "lacznie",
+      delivery: "dostawa",
+    }),
+    confirmCopy: Object.freeze({
+      default: "Wycena zostala potwierdzona i jest gotowa do przekazania opiekunowi.",
+      sent: "Wycena zostala potwierdzona i wyslana do CRM/opiekuna.",
+      pending:
+        "Wycena zostala potwierdzona. Wysylka do CRM jest w kolejce i bedzie ponawiana automatycznie.",
+      failed:
+        "Wycena zostala potwierdzona, ale wysylka do CRM nie powiodla sie. System bedzie ponawial probe.",
+      not_configured:
+        "Wycena zostala potwierdzona, ale CRM_WEBHOOK_URL nie jest skonfigurowany.",
+    }),
+    errorPrefix: "Blad",
+    confirmErrorPrefix: "Blad potwierdzenia",
+    noneLabel: "brak",
+  }),
+  en: Object.freeze({
+    statusLabel: "Status",
+    status: Object.freeze({
+      active: "active",
+      needs_clarification: "needs clarification",
+      ready_for_confirmation: "ready to confirm",
+      confirmed: "confirmed",
+    }),
+    estimateLabel: "Estimate",
+    estimateTotalLabel: "Total",
+    estimateNotReady: "will appear after key details are provided",
+    warningsLabel: "Notes",
+    sendLabel: "Send",
+    confirmLabel: "Confirm estimate",
+    placeholder:
+      "Example: Bathroom 6m2, remove old tiles, tile 60x60...",
+    crmTitle: "CRM DTO (preview)",
+    crmPreviewTitle: "CRM DTO",
+    crmAvailableAfter: "available after confirmation",
+    crmFields: Object.freeze({
+      sessionId: "sessionId",
+      city: "city",
+      contact: "contact",
+      note: "note",
+      total: "total",
+      delivery: "delivery",
+    }),
+    confirmCopy: Object.freeze({
+      default: "Estimate confirmed and ready to hand over to a manager.",
+      sent: "Estimate confirmed and sent to CRM/manager.",
+      pending:
+        "Estimate confirmed. CRM delivery is queued and will be retried automatically.",
+      failed:
+        "Estimate confirmed, but CRM delivery failed. The system will retry.",
+      not_configured: "Estimate confirmed, but CRM_WEBHOOK_URL is not configured.",
+    }),
+    errorPrefix: "Error",
+    confirmErrorPrefix: "Confirmation error",
+    noneLabel: "n/a",
+  }),
+  ru: Object.freeze({
+    statusLabel: "\u0421\u0442\u0430\u0442\u0443\u0441",
+    status: Object.freeze({
+      active: "\u0430\u043a\u0442\u0438\u0432\u043d\u0430",
+      needs_clarification: "\u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u0443\u0442\u043e\u0447\u043d\u0435\u043d\u0438\u044f",
+      ready_for_confirmation: "\u0433\u043e\u0442\u043e\u0432\u0430 \u043a \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0438\u044e",
+      confirmed: "\u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0430",
+    }),
+    estimateLabel: "\u0421\u043c\u0435\u0442\u0430",
+    estimateTotalLabel: "\u0418\u0442\u043e\u0433\u043e",
+    estimateNotReady:
+      "\u043f\u043e\u044f\u0432\u0438\u0442\u0441\u044f \u043f\u043e\u0441\u043b\u0435 \u0443\u043a\u0430\u0437\u0430\u043d\u0438\u044f \u043a\u043b\u044e\u0447\u0435\u0432\u044b\u0445 \u0434\u0430\u043d\u043d\u044b\u0445",
+    warningsLabel: "\u0417\u0430\u043c\u0435\u0442\u043a\u0438",
+    sendLabel: "\u041e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u044c",
+    confirmLabel: "\u041f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044c \u0441\u043c\u0435\u0442\u0443",
+    placeholder:
+      "\u041d\u0430\u043f\u0440.: \u0412\u0430\u043d\u043d\u0430\u044f 6\u043c2, \u0434\u0435\u043c\u043e\u043d\u0442\u0430\u0436 \u0441\u0442\u0430\u0440\u043e\u0439 \u043f\u043b\u0438\u0442\u043a\u0438, \u043f\u043b\u0438\u0442\u043a\u0430 60x60...",
+    crmTitle: "CRM DTO (\u043f\u0440\u0435\u0434\u043f\u0440\u043e\u0441\u043c\u043e\u0442\u0440)",
+    crmPreviewTitle: "CRM DTO",
+    crmAvailableAfter:
+      "\u0434\u043e\u0441\u0442\u0443\u043f\u043d\u043e \u043f\u043e\u0441\u043b\u0435 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0438\u044f",
+    crmFields: Object.freeze({
+      sessionId: "sessionId",
+      city: "\u0433\u043e\u0440\u043e\u0434",
+      contact: "\u043a\u043e\u043d\u0442\u0430\u043a\u0442",
+      note: "\u0437\u0430\u043c\u0435\u0442\u043a\u0430",
+      total: "\u0438\u0442\u043e\u0433\u043e",
+      delivery: "\u0434\u043e\u0441\u0442\u0430\u0432\u043a\u0430",
+    }),
+    confirmCopy: Object.freeze({
+      default:
+        "\u0421\u043c\u0435\u0442\u0430 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0430 \u0438 \u0433\u043e\u0442\u043e\u0432\u0430 \u043a \u043f\u0435\u0440\u0435\u0434\u0430\u0447\u0435 \u043c\u0435\u043d\u0435\u0434\u0436\u0435\u0440\u0443.",
+      sent:
+        "\u0421\u043c\u0435\u0442\u0430 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0430 \u0438 \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0430 \u0432 CRM/\u043c\u0435\u043d\u0435\u0434\u0436\u0435\u0440\u0443.",
+      pending:
+        "\u0421\u043c\u0435\u0442\u0430 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0430. \u041e\u0442\u043f\u0440\u0430\u0432\u043a\u0430 \u0432 CRM \u0432 \u043e\u0447\u0435\u0440\u0435\u0434\u0438 \u0438 \u0431\u0443\u0434\u0435\u0442 \u043f\u043e\u0432\u0442\u043e\u0440\u044f\u0442\u044c\u0441\u044f \u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438.",
+      failed:
+        "\u0421\u043c\u0435\u0442\u0430 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0430, \u043d\u043e \u043e\u0442\u043f\u0440\u0430\u0432\u043a\u0430 \u0432 CRM \u043d\u0435 \u0443\u0434\u0430\u043b\u0430\u0441\u044c. \u0421\u0438\u0441\u0442\u0435\u043c\u0430 \u043f\u043e\u0432\u0442\u043e\u0440\u0438\u0442 \u043f\u043e\u043f\u044b\u0442\u043a\u0443.",
+      not_configured:
+        "\u0421\u043c\u0435\u0442\u0430 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0430, \u043d\u043e CRM_WEBHOOK_URL \u043d\u0435 \u043d\u0430\u0441\u0442\u0440\u043e\u0435\u043d.",
+    }),
+    errorPrefix: "\u041e\u0448\u0438\u0431\u043a\u0430",
+    confirmErrorPrefix: "\u041e\u0448\u0438\u0431\u043a\u0430 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0438\u044f",
+    noneLabel: "\u043d\u0435\u0442",
+  }),
 });
 
 const messagesEl = document.getElementById("messages");
@@ -19,6 +142,29 @@ const chatForm = document.getElementById("chatForm");
 const messageInput = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
 const confirmBtn = document.getElementById("confirmBtn");
+
+function getLanguagePack(language) {
+  return LANGUAGE_PACKS[language] ?? LANGUAGE_PACKS.pl;
+}
+
+function setLanguage(language) {
+  state.language = language ?? state.language ?? "pl";
+  const pack = getLanguagePack(state.language);
+
+  if (sendBtn) {
+    sendBtn.textContent = pack.sendLabel;
+  }
+  if (confirmBtn) {
+    confirmBtn.textContent = pack.confirmLabel;
+  }
+  if (messageInput) {
+    messageInput.placeholder = pack.placeholder;
+  }
+
+  setStatus(state.status);
+  renderEstimate({ estimate: state.lastEstimate, status: state.status });
+    crmResultEl.innerHTML = `<strong>${pack.crmPreviewTitle}:</strong> ${pack.crmAvailableAfter}`;
+}
 
 function scrollMessagesToBottom({ smooth = true } = {}) {
   if (!messagesEl) {
@@ -44,8 +190,9 @@ function appendMessage(text, role) {
 }
 
 function setStatus(status) {
-  const label = STATUS_LABELS[status] ?? status;
-  statusEl.innerHTML = `<strong>Status:</strong> ${label}`;
+  const pack = getLanguagePack(state.language);
+  const label = pack.status[status] ?? status;
+  statusEl.innerHTML = `<strong>${pack.statusLabel}:</strong> ${label}`;
 }
 
 function normalizeAssistantMessage(text) {
@@ -64,6 +211,7 @@ function normalizeAssistantMessage(text) {
 }
 
 function renderEstimate(payload) {
+  const pack = getLanguagePack(state.language);
   const estimate = payload?.estimate;
   const status = String(payload?.status ?? state.status ?? "");
   const isFinalizable =
@@ -71,7 +219,7 @@ function renderEstimate(payload) {
 
   if (!estimate || !isFinalizable) {
     estimateEl.innerHTML =
-      "<strong>Wycena:</strong> pojawi sie po uzupelnieniu kluczowych informacji";
+      `<strong>${pack.estimateLabel}:</strong> ${pack.estimateNotReady}`;
     return;
   }
 
@@ -86,8 +234,8 @@ function renderEstimate(payload) {
     .join("");
 
   estimateEl.innerHTML = `
-    <strong>Wycena:</strong>
-    <div>Lacznie: ${estimate.total} PLN</div>
+    <strong>${pack.estimateLabel}:</strong>
+    <div>${pack.estimateTotalLabel}: ${estimate.total} PLN</div>
     ${rows ? `<ul>${rows}</ul>` : ""}
   `;
 }
@@ -97,13 +245,16 @@ function renderWarnings(payload) {
     return;
   }
 
-  appendMessage(`Uwagi: ${payload.warnings.join(" | ")}`, "assistant");
+  const pack = getLanguagePack(state.language);
+  appendMessage(`${pack.warningsLabel}: ${payload.warnings.join(" | ")}`, "assistant");
 }
 
 function renderResponse(payload) {
   state.sessionId = payload.sessionId ?? state.sessionId;
   state.status = payload.status ?? state.status;
   state.lastEstimate = payload.estimate ?? state.lastEstimate;
+  state.language = payload.language ?? state.language;
+  setLanguage(state.language);
 
   setStatus(state.status);
 
@@ -158,7 +309,8 @@ async function handleSend(message) {
 
     renderResponse(payload);
   } catch (error) {
-    appendMessage(`Blad: ${error.message}`, "assistant");
+    const pack = getLanguagePack(state.language);
+    appendMessage(`${pack.errorPrefix}: ${error.message}`, "assistant");
   } finally {
     sendBtn.disabled = false;
     confirmBtn.disabled = state.status !== "ready_for_confirmation";
@@ -184,20 +336,17 @@ async function handleConfirm() {
     const crmStatus = String(
       payload?.crmResult?.status ?? payload?.crmResult?.mode ?? "unknown",
     ).toLowerCase();
-    let confirmationCopy =
-      "Wycena zostala potwierdzona i jest gotowa do przekazania opiekunowi.";
+    const pack = getLanguagePack(state.language);
+    let confirmationCopy = pack.confirmCopy.default;
 
     if (crmStatus === "sent") {
-      confirmationCopy = "Wycena zostala potwierdzona i wyslana do CRM/opiekuna.";
+      confirmationCopy = pack.confirmCopy.sent;
     } else if (crmStatus === "pending") {
-      confirmationCopy =
-        "Wycena zostala potwierdzona. Wysylka do CRM jest w kolejce i bedzie ponawiana automatycznie.";
+      confirmationCopy = pack.confirmCopy.pending;
     } else if (crmStatus === "failed") {
-      confirmationCopy =
-        "Wycena zostala potwierdzona, ale wysylka do CRM nie powiodla sie. System bedzie ponawial probe.";
+      confirmationCopy = pack.confirmCopy.failed;
     } else if (crmStatus === "not_configured") {
-      confirmationCopy =
-        "Wycena zostala potwierdzona, ale CRM_WEBHOOK_URL nie jest skonfigurowany.";
+      confirmationCopy = pack.confirmCopy.not_configured;
     }
 
     appendMessage(confirmationCopy, "assistant");
@@ -207,17 +356,20 @@ async function handleConfirm() {
       .filter(Boolean)
       .join(" / ");
 
+    const crmLabels = pack.crmFields;
+    const noneLabel = pack.noneLabel;
     crmResultEl.innerHTML = `
-      <strong>CRM DTO (podglad):</strong>
-      <div>sessionId: ${payload.crmLead.sessionId}</div>
-      <div>miasto: ${crmCustomer.city ?? "brak"}</div>
-      <div>kontakt: ${contactSummary || "brak"}</div>
-      <div>notatka: ${crmCustomer.note ?? "brak"}</div>
-      <div>lacznie: ${payload.crmLead.estimate.total} ${payload.crmLead.estimate.currency}</div>
-      <div>delivery: ${payload?.crmResult?.status ?? payload?.crmResult?.mode ?? "unknown"}</div>
+      <strong>${pack.crmTitle}:</strong>
+      <div>${crmLabels.sessionId}: ${payload.crmLead.sessionId}</div>
+      <div>${crmLabels.city}: ${crmCustomer.city ?? noneLabel}</div>
+      <div>${crmLabels.contact}: ${contactSummary || noneLabel}</div>
+      <div>${crmLabels.note}: ${crmCustomer.note ?? noneLabel}</div>
+      <div>${crmLabels.total}: ${payload.crmLead.estimate.total} ${payload.crmLead.estimate.currency}</div>
+      <div>${crmLabels.delivery}: ${payload?.crmResult?.status ?? payload?.crmResult?.mode ?? "unknown"}</div>
     `;
   } catch (error) {
-    appendMessage(`Blad potwierdzenia: ${error.message}`, "assistant");
+    const pack = getLanguagePack(state.language);
+    appendMessage(`${pack.confirmErrorPrefix}: ${error.message}`, "assistant");
   } finally {
     confirmBtn.disabled = state.status !== "ready_for_confirmation";
     scrollMessagesToBottom();
@@ -238,6 +390,4 @@ chatForm.addEventListener("submit", async (event) => {
 confirmBtn.addEventListener("click", handleConfirm);
 
 setStatus("active");
-estimateEl.innerHTML =
-  "<strong>Wycena:</strong> pojawi sie po uzupelnieniu kluczowych informacji";
-crmResultEl.innerHTML = "<strong>CRM DTO:</strong> dostepne po potwierdzeniu";
+setLanguage(state.language);
