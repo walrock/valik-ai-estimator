@@ -20,6 +20,7 @@ const LANGUAGE_PACKS = Object.freeze({
     warningsLabel: "Uwagi",
     sendLabel: "Wyslij",
     confirmLabel: "Potwierdz wycene",
+    newChatLabel: "Nowa wycena",
     placeholder:
       "Np. Lazienka 6m2, skucie starych plytek, plytki 60x60...",
     crmTitle: "CRM DTO (podglad)",
@@ -107,6 +108,7 @@ const LANGUAGE_PACKS = Object.freeze({
     warningsLabel: "Notes",
     sendLabel: "Send",
     confirmLabel: "Confirm estimate",
+    newChatLabel: "New estimate",
     placeholder:
       "Example: Bathroom 6m2, remove old tiles, tile 60x60...",
     crmTitle: "CRM DTO (preview)",
@@ -194,6 +196,7 @@ const LANGUAGE_PACKS = Object.freeze({
     warningsLabel: "\u0417\u0430\u043c\u0435\u0442\u043a\u0438",
     sendLabel: "\u041e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u044c",
     confirmLabel: "\u041f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044c \u0441\u043c\u0435\u0442\u0443",
+    newChatLabel: "\u041d\u043e\u0432\u0430\u044f \u0441\u043c\u0435\u0442\u0430",
     placeholder:
       "\u041d\u0430\u043f\u0440.: \u0412\u0430\u043d\u043d\u0430\u044f 6\u043c2, \u0434\u0435\u043c\u043e\u043d\u0442\u0430\u0436 \u0441\u0442\u0430\u0440\u043e\u0439 \u043f\u043b\u0438\u0442\u043a\u0438, \u043f\u043b\u0438\u0442\u043a\u0430 60x60...",
     crmTitle: "CRM DTO (\u043f\u0440\u0435\u0434\u043f\u0440\u043e\u0441\u043c\u043e\u0442\u0440)",
@@ -280,6 +283,7 @@ const chatForm = document.getElementById("chatForm");
 const messageInput = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
 const confirmBtn = document.getElementById("confirmBtn");
+const newChatBtn = document.getElementById("newChatBtn");
 
 function getLanguagePack(language) {
   return LANGUAGE_PACKS[language] ?? LANGUAGE_PACKS.pl;
@@ -314,6 +318,9 @@ function setLanguage(language) {
   }
   if (confirmBtn) {
     confirmBtn.textContent = pack.confirmLabel;
+  }
+  if (newChatBtn) {
+    newChatBtn.textContent = pack.newChatLabel ?? "New estimate";
   }
   if (messageInput) {
     messageInput.placeholder = pack.placeholder;
@@ -477,6 +484,20 @@ async function handleSend(message) {
   }
 }
 
+function resetConversation() {
+  state.sessionId = null;
+  state.status = "active";
+  state.lastEstimate = null;
+
+  messagesEl.innerHTML = "";
+  setStatus(state.status);
+  renderEstimate({ estimate: null, status: state.status });
+  confirmBtn.disabled = true;
+  sendBtn.disabled = false;
+  crmResultEl.innerHTML = `<strong>${getLanguagePack(state.language).crmPreviewTitle}:</strong> ${getLanguagePack(state.language).crmAvailableAfter}`;
+  scrollMessagesToBottom({ smooth: false });
+}
+
 async function handleConfirm() {
   if (!state.sessionId) {
     return;
@@ -551,6 +572,7 @@ chatForm.addEventListener("submit", async (event) => {
 });
 
 confirmBtn.addEventListener("click", handleConfirm);
+newChatBtn.addEventListener("click", resetConversation);
 
 setStatus("active");
 setLanguage(state.language);

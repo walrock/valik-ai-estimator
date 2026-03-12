@@ -170,6 +170,15 @@ button {
   background: rgba(47, 111, 115, 0.1);
 }
 
+#newChatBtn {
+  background: rgba(199, 123, 90, 0.08);
+  border-color: rgba(199, 123, 90, 0.3);
+}
+
+#newChatBtn:hover:not(:disabled) {
+  background: rgba(199, 123, 90, 0.16);
+}
+
 button:active:not(:disabled) {
   transform: translateY(1px);
 }
