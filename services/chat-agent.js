@@ -84,7 +84,7 @@ const GREETING_PATTERN =
 const AREA_OR_QUANTITY_SIGNAL_PATTERN =
   /\d+(?:[.,]\d+)?\s*(?:m2|m\^2|m²|sqm|sq\.?\s*m|кв\.?\s*м|квм|szt|szt\.|pcs?|шт)\b/iu;
 const PROJECT_SCOPE_SIGNAL_PATTERN =
-  /(?:estimate|quotation|quote|pricing|price|cost|paint|painting|plaster|tile|tiling|wall|walls|ceiling|floor|room|apartment|flat|house|renovat|remodel|repair|deadline|start date|city|malow|farb|szpachl|gips|tynk|plytk|płytk|scian|ścian|sufit|podlog|podłog|remont|wycen|koszt|termin|miast|mieszkan|łazien|lazien|kuchni|pokoj|покрас|краск|шпакл|штукатур|плитк|стен|потол|пол|ремонт|смет|оценк|стоимост|дедлайн|срок|город|объект|квартир|дом|ванн|кухн)/iu;
+  /(?:estimate|quotation|quote|pricing|price|cost|paint|painting|plaster|tile|tiling|wall|walls|ceiling|floor|room|apartment|flat|house|renovat|remodel|repair|city|malow|farb|szpachl|gips|tynk|plytk|płytk|scian|ścian|sufit|podlog|podłog|remont|wycen|koszt|miast|mieszkan|łazien|lazien|kuchni|pokoj|покрас|краск|шпакл|штукатур|плитк|стен|потол|пол|ремонт|смет|оценк|стоимост|город|объект|квартир|дом|ванн|кухн)/iu;
 const PRICE_QUESTION_PATTERN =
   /(?:\bprice\b|\bcost\b|\bcena\b|\bkoszt\b|wycen|цен|стоим|сколько)/i;
 const PROCESS_QUESTION_PATTERN =
