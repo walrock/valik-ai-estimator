@@ -291,8 +291,4 @@ test("chat agent appends missing-data questions when AI reply is too generic", a
     result.response.assistantMessage,
     /Please provide area in m2 or item count for each work\./i,
   );
-  assert.match(
-    result.response.assistantMessage,
-    /What is the expected start date or deadline for the project\?/i,
-  );
 });

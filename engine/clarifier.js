@@ -2,59 +2,9 @@
 
 const TOKEN_BOUNDARY_LEFT = String.raw`(?<![\p{L}\p{N}_])`;
 const TOKEN_BOUNDARY_RIGHT = String.raw`(?![\p{L}\p{N}_])`;
-const RU_MONTH_PATTERN =
-  "(?:январ[ьяе]|феврал[ьяе]|март[ае]?|апрел[ьяе]|ма[йяе]|июн[ьяе]|июл[ьяе]|август[ае]?|сентябр[ьяе]|октябр[ьяе]|ноябр[ьяе]|декабр[ьяе])";
-const PL_MONTH_PATTERN =
-  "(?:styczni[aeu]|lut(?:y|ego)|marca|kwietni[aeu]|maja|czerwca|lipca|sierpni[aeu]|wrze(?:ś|s)ni[aeu]|pa(?:ź|z)dziernik[aeu]|listopada|grudni[aeu])";
-const EN_MONTH_PATTERN =
-  "(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)";
 
 const AREA_PATTERN = new RegExp(
   `${TOKEN_BOUNDARY_LEFT}\\d+(?:[.,]\\d+)?\\s*(?:m2|m\\^2|m²|м2|м\\^2|м²|sqm|кв\\.?\\s*м|квм)${TOKEN_BOUNDARY_RIGHT}`,
-  "iu",
-);
-const DEADLINE_PATTERN = new RegExp(
-  [
-    `${TOKEN_BOUNDARY_LEFT}(?:`,
-    [
-      "asap",
-      "urgent",
-      "pilne",
-      "szybko",
-      "tomorrow",
-      "jutro",
-      "pojutrze",
-      "next week",
-      "next month",
-      "w tym tygodniu",
-      "w przysz(?:ł|l)ym tygodniu",
-      "w przysz(?:ł|l)ym miesi(?:ą|a)cu",
-      "za\\s+\\d+\\s*(?:day|days|week|weeks|month|months|dzien|dni|tydzien|tygodnie|tygodni|miesiac|miesiace|miesiecy)",
-      "\\d+\\s*(?:day|days|week|weeks|month|months)",
-      "срочно",
-      "сегодня",
-      "сейчас",
-      "прямо\\s+сейчас",
-      "как\\s+можно\\s+скорее",
-      "в\\s+ближайшие\\s+дни",
-      "завтра",
-      "послезавтра",
-      "на следующей неделе",
-      "на следующем месяце",
-      "через\\s+\\d+\\s*(?:день|дня|дней|недел[яиюе]|месяц|месяца|месяцев)",
-      "(?:срок|скрок|deadline|termin|start(?:\\s+date)?|rozpoczecie|rozpoczecia)\\s*[:\\-]?\\s*\\d+\\s*(?:day|days|week|weeks|month|months|dzien|dni|tydzien|tygodnie|tygodni|miesiac|miesiace|miesiecy|день|дня|дней|недел[яиюе]|месяц|месяца|месяцев)",
-      "(?:срок|скрок)\\s*[:\\-]?\\s*(?:пару|пара|несколько)\\s*(?:дней|недель|месяцев)",
-      "(?:с|со|od|from)\\s+\\d{1,2}\\s*(?:" +
-        RU_MONTH_PATTERN +
-        "|" +
-        PL_MONTH_PATTERN +
-        "|" +
-        EN_MONTH_PATTERN +
-        ")",
-      "(?:deadline|termin|start(?:\\s+date)?|od|from|с|со|до)\\s+\\d{1,2}[./-]\\d{1,2}(?:[./-]\\d{2,4})?",
-    ].join("|"),
-    `)${TOKEN_BOUNDARY_RIGHT}`,
-  ].join(""),
   "iu",
 );
 const FLOOR_PATTERN = new RegExp(
@@ -71,7 +21,6 @@ const QUESTION_BY_FIELD = Object.freeze({
   pl: Object.freeze({
     work_scope: "Jakie dokladnie prace mamy uwzglednic w wycenie?",
     area_or_quantity: "Podaj prosze powierzchnie w m2 lub ilosc sztuk dla kazdej pracy.",
-    deadline: "Jaki jest planowany termin rozpoczecia lub deadline realizacji?",
     floor_number: "Na ktorym pietrze znajduje sie lokal?",
     lift_access: "Czy na miejscu jest dostepna winda?",
     city: "W jakim miescie znajduje sie inwestycja?",
@@ -79,7 +28,6 @@ const QUESTION_BY_FIELD = Object.freeze({
   en: Object.freeze({
     work_scope: "Which exact works should be included in the estimate?",
     area_or_quantity: "Please provide area in m2 or item count for each work.",
-    deadline: "What is the expected start date or deadline for the project?",
     floor_number: "What floor is the property on?",
     lift_access: "Is a lift/elevator available on site?",
     city: "In which city is the project located?",
@@ -87,7 +35,6 @@ const QUESTION_BY_FIELD = Object.freeze({
   ru: Object.freeze({
     work_scope: "Какие именно работы нужно включить в смету?",
     area_or_quantity: "Укажите площадь в м2 или количество для каждой работы.",
-    deadline: "Какой планируемый срок начала или дедлайн проекта?",
     floor_number: "На каком этаже находится объект?",
     lift_access: "Есть ли на объекте лифт?",
     city: "В каком городе находится объект?",
@@ -109,10 +56,6 @@ export function detectMissingFields({ message, works }) {
   );
   if (!hasAnyPositiveQuantity && !AREA_PATTERN.test(normalizedMessage)) {
     missingFields.push("area_or_quantity");
-  }
-
-  if (!DEADLINE_PATTERN.test(normalizedMessage)) {
-    missingFields.push("deadline");
   }
 
   const hasDemolition = normalizedWorks.some((work) =>
