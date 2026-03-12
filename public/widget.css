@@ -52,6 +52,11 @@ body {
   color: rgba(30, 43, 44, 0.72);
 }
 
+.widget__header {
+  position: relative;
+  padding-right: 160px;
+}
+
 .widget__status,
 .widget__messages,
 .widget__estimate,
@@ -170,12 +175,15 @@ button {
   background: rgba(47, 111, 115, 0.1);
 }
 
-#newChatBtn {
+.widget__reset {
+  position: absolute;
+  top: 12px;
+  right: 12px;
   background: rgba(199, 123, 90, 0.08);
   border-color: rgba(199, 123, 90, 0.3);
 }
 
-#newChatBtn:hover:not(:disabled) {
+.widget__reset:hover:not(:disabled) {
   background: rgba(199, 123, 90, 0.16);
 }
 
@@ -196,6 +204,15 @@ button:disabled {
   .widget {
     padding: 14px;
     border-radius: var(--r-lg);
+  }
+
+  .widget__header {
+    padding-right: 0;
+  }
+
+  .widget__reset {
+    position: static;
+    margin-top: 8px;
   }
 
   .widget__messages {
