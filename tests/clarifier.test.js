@@ -78,34 +78,31 @@ test("clarifier recognizes conversational Russian timeline phrases", () => {
 });
 
 test("clarifier returns mapped questions for missing fields in Polish", () => {
-  const questions = buildClarifyingQuestions(["deadline", "city"], {
+  const questions = buildClarifyingQuestions(["deadline"], {
     language: "pl",
   });
 
   assert.deepEqual(questions, [
     "Jaki jest planowany termin rozpoczecia lub deadline realizacji?",
-    "W jakim miescie znajduje sie inwestycja?",
   ]);
 });
 
 test("clarifier returns mapped questions for missing fields in English", () => {
-  const questions = buildClarifyingQuestions(["deadline", "city"], {
+  const questions = buildClarifyingQuestions(["deadline"], {
     language: "en",
   });
 
   assert.deepEqual(questions, [
     "What is the expected start date or deadline for the project?",
-    "In which city is the project located?",
   ]);
 });
 
 test("clarifier returns mapped questions for missing fields in Russian", () => {
-  const questions = buildClarifyingQuestions(["deadline", "city"], {
+  const questions = buildClarifyingQuestions(["deadline"], {
     language: "ru",
   });
 
   assert.deepEqual(questions, [
     "Какой планируемый срок начала или дедлайн проекта?",
-    "В каком городе находится объект?",
   ]);
 });

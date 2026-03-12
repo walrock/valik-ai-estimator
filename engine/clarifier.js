@@ -65,56 +65,6 @@ const LIFT_PATTERN = new RegExp(
   `${TOKEN_BOUNDARY_LEFT}(?:without?\\s+(?:lift|elevator)|with\\s+(?:lift|elevator)|bez\\s+windy|z\\s+wind(?:a|ą)|winda|без\\s+лифт[ауы]?|с\\s+лифт[ауы]?|лифт)${TOKEN_BOUNDARY_RIGHT}`,
   "iu",
 );
-const CITY_PATTERN = new RegExp(
-  `${TOKEN_BOUNDARY_LEFT}(?:` +
-    [
-      "warsaw[\\p{L}]*",
-      "warszaw[\\p{L}]*",
-      "варшав[\\p{L}]*",
-      "krakow[\\p{L}]*",
-      "kraków[\\p{L}]*",
-      "краков[\\p{L}]*",
-      "wroclaw[\\p{L}]*",
-      "wroc(?:ł|l)aw[\\p{L}]*",
-      "вроцлав[\\p{L}]*",
-      "gdansk[\\p{L}]*",
-      "gda(?:ń|n)sk[\\p{L}]*",
-      "гдань?ск[\\p{L}]*",
-      "gdyni[\\p{L}]*",
-      "гдын[\\p{L}]*",
-      "sopot[\\p{L}]*",
-      "сопот[\\p{L}]*",
-      "poznan[\\p{L}]*",
-      "poznań[\\p{L}]*",
-      "познан[\\p{L}]*",
-      "lodz[\\p{L}]*",
-      "łódź[\\p{L}]*",
-      "лодз[\\p{L}]*",
-      "trojmiast[\\p{L}]*",
-      "trójmiast[\\p{L}]*",
-      "троймяст[\\p{L}]*",
-      "berlin[\\p{L}]*",
-      "берлин[\\p{L}]*",
-      "munich[\\p{L}]*",
-      "m[üu]nchen[\\p{L}]*",
-      "мюнхен[\\p{L}]*",
-      "london[\\p{L}]*",
-      "лондон[\\p{L}]*",
-      "paris[\\p{L}]*",
-      "pary(?:ż|z)[\\p{L}]*",
-      "париж[\\p{L}]*",
-      "moscow[\\p{L}]*",
-      "moskva[\\p{L}]*",
-      "москв[\\p{L}]*",
-      "saint[-\\s]?petersburg",
-      "st\\.?\\s?petersburg",
-      "санкт[-\\s]?петербург",
-      "питер[\\p{L}]*",
-    ].join("|") +
-    `)${TOKEN_BOUNDARY_RIGHT}`,
-  "iu",
-);
-
 const DEMOLITION_TYPES = new Set(["demolition_no_lift", "demolition_with_lift"]);
 
 const QUESTION_BY_FIELD = Object.freeze({
@@ -176,10 +126,6 @@ export function detectMissingFields({ message, works }) {
     if (!FLOOR_PATTERN.test(normalizedMessage)) {
       missingFields.push("floor_number");
     }
-  }
-
-  if (!CITY_PATTERN.test(normalizedMessage)) {
-    missingFields.push("city");
   }
 
   return missingFields;

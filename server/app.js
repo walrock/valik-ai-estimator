@@ -20,7 +20,7 @@ import { extractApiKey, getClientIp } from "../security/request.js";
 import { createLogger } from "../infra/logger.js";
 import { createAppMetrics } from "../infra/metrics.js";
 
-const DEFAULT_INITIAL_FIELDS = ["work_scope", "area_or_quantity", "deadline", "city"];
+const DEFAULT_INITIAL_FIELDS = ["work_scope", "area_or_quantity", "deadline"];
 const PUBLIC_DIR = path.join(process.cwd(), "public");
 const STATIC_ROUTES = Object.freeze({
   "/": { file: "widget.html", type: "text/html; charset=utf-8" },

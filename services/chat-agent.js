@@ -17,7 +17,7 @@ function nowIso() {
 const PROMPTS = Object.freeze({
   pl: Object.freeze({
     initial:
-      "Opisz zakres prac, powierzchnie/ilosci, miasto i preferowany termin realizacji.",
+      "Opisz zakres prac, powierzchnie/ilosci i preferowany termin realizacji.",
     ready:
       "Wstepna wycena jest gotowa. Jesli wszystko sie zgadza, kliknij \"Potwierdz wycene\", a przekaze dane do opiekuna.",
     confirmed:
@@ -29,7 +29,7 @@ const PROMPTS = Object.freeze({
   }),
   en: Object.freeze({
     initial:
-      "Describe required works, area/quantity, city and preferred timeline.",
+      "Describe required works, area/quantity, and preferred timeline.",
     ready:
       "The draft estimate is ready. If everything looks good, click \"Confirm estimate\" and I will pass it to a manager.",
     confirmed:
@@ -40,7 +40,7 @@ const PROMPTS = Object.freeze({
       "Please share a few more details about works and quantities, and I will prepare a more accurate estimate.",
   }),
   ru: Object.freeze({
-    initial: "Опишите работы, площадь/количество, город и желаемые сроки.",
+    initial: "Опишите работы, площадь/количество и желаемые сроки.",
     ready:
       "Черновая смета готова. Если все верно, нажмите \"Подтвердить смету\", и я передам данные менеджеру.",
     confirmed:

@@ -113,7 +113,6 @@ test("API workflow: start chat, clarify details, get estimate and confirm", asyn
     assert.ok(started.assistantMessage.includes("I need a few more details"));
     assert.equal(started.estimate.subtotal, 1650);
     assert.ok(started.missingFields.includes("deadline"));
-    assert.ok(started.missingFields.includes("city"));
 
     const messageResponse = await fetch(`${runtime.baseUrl}/api/chat/message`, {
       method: "POST",
