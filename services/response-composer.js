@@ -88,6 +88,7 @@ export function createOpenAIResponseComposer({
             "Use the requested language code exactly: pl, en or ru.",
             "Tone: warm, professional, consultative, conversion-focused.",
             "Keep message concise and natural (2-8 short lines).",
+            "Use short, simple sentences.",
             "Prefer natural conversational phrasing, not robotic templates.",
             "Do not change facts, numbers, status, or required questions.",
             "Do not invent services, discounts, guarantees, deadlines, or prices.",

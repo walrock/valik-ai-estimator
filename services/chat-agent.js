@@ -19,42 +19,42 @@ const PROMPTS = Object.freeze({
     initial:
       "Opisz zakres prac oraz powierzchnie/ilosci.",
     ready:
-      "Wstepna wycena jest gotowa. Jesli wszystko sie zgadza, kliknij \"Potwierdz wycene\", a przekaze dane do opiekuna. Jesli masz dodatkowe pytania, zostaw wiadomosc, numer telefonu lub e-mail, a oddzwonimy.",
+      "Wstepna wycena jest gotowa. Jesli wszystko sie zgadza, kliknij \"Potwierdz wycene\" - przekaze dane opiekunowi. Jesli chcesz, zostaw telefon lub e-mail, a oddzwonimy.",
     contact:
-      "Dziekuje! Kontakt zapisany. Jesli wszystko sie zgadza, kliknij \"Potwierdz wycene\".",
+      "Dziekuje! Kontakt zapisany. Kliknij \"Potwierdz wycene\", a opiekun sie odezwie.",
     confirmed:
-      "Wycena jest juz potwierdzona i przekazana do opiekuna. Aby przygotowac nowa wycene, rozpocznij nowa rozmowe.",
+      "Wycena jest juz potwierdzona i przekazana do opiekuna. Jesli potrzebujesz nowej wyceny, rozpocznij nowa rozmowe.",
     clarifying:
-      "Zeby przygotowac dokladna wycene, potrzebuje jeszcze kilku informacji:",
+      "Zeby przygotowac wycene, potrzebuje jeszcze kilku informacji:",
     generic:
-      "Podaj prosze troche wiecej szczegolow o zakresie prac i ilosciach, a przygotuje dokladniejsza wycene.",
+      "Podaj prosze wiecej szczegolow o zakresie prac i ilosciach, a przygotuje wycene.",
   }),
   en: Object.freeze({
     initial:
       "Describe required works and area/quantity.",
     ready:
-      "The draft estimate is ready. If everything looks good, click \"Confirm estimate\" and I will pass it to a manager. If you have more questions, leave a message, phone number, or email and we will call you back.",
+      "The draft estimate is ready. If everything looks good, click \"Confirm estimate\" - I will pass it to a manager. If you want a callback, leave a phone number or email.",
     contact:
-      "Thanks! Contact details saved. If everything looks good, click \"Confirm estimate\".",
+      "Thanks! Contact saved. Click \"Confirm estimate\" and a manager will reach out.",
     confirmed:
       "This estimate is already confirmed and handed over to a manager. To prepare a new one, please start a new chat.",
     clarifying:
-      "I need a few more details to complete an accurate estimate:",
+      "I need a few more details to complete the estimate:",
     generic:
-      "Please share a few more details about works and quantities, and I will prepare a more accurate estimate.",
+      "Please share a few more details about works and quantities, and I will prepare the estimate.",
   }),
   ru: Object.freeze({
     initial: "Опишите работы и площадь/количество.",
     ready:
-      "Черновая смета готова. Если все верно, нажмите \"Подтвердить смету\", и я передам данные менеджеру. Если есть вопросы, оставьте сообщение, номер телефона или email, и мы перезвоним.",
+      "Черновая смета готова. Если все верно, нажмите \"Подтвердить смету\" - я передам данные менеджеру. Хотите, чтобы мы связались? Оставьте телефон или email.",
     contact:
-      "Спасибо! Контакт записан. Если все верно, нажмите \"Подтвердить смету\".",
+      "Спасибо! Контакт записан. Нажмите \"Подтвердить смету\", и менеджер свяжется с вами.",
     confirmed:
       "Эта смета уже подтверждена и передана менеджеру. Чтобы сделать новую смету, начните новый диалог.",
     clarifying:
-      "Чтобы подготовить точную смету, мне нужно еще несколько деталей:",
+      "Чтобы подготовить смету, мне нужно еще несколько деталей:",
     generic:
-      "Пожалуйста, уточните работы и объемы, и я подготовлю более точную смету.",
+      "Пожалуйста, уточните работы и объемы, и я подготовлю смету.",
   }),
 });
 
@@ -62,23 +62,23 @@ const SALES_STYLE = Object.freeze({
   pl: Object.freeze({
     confirmButtonLabel: "Potwierdz wycene",
     confirmCta:
-      'Jesli wszystko sie zgadza, kliknij "Potwierdz wycene", a przekaze dane do opiekuna. Jesli masz dodatkowe pytania, zostaw wiadomosc, numer telefonu lub e-mail, a oddzwonimy.',
+      'Jesli wszystko sie zgadza, kliknij "Potwierdz wycene", a przekaze dane do opiekuna. Jesli chcesz, zostaw telefon lub e-mail, a oddzwonimy.',
     contactHint:
-      "Jesli masz dodatkowe pytania, zostaw wiadomosc, numer telefonu lub e-mail, a oddzwonimy.",
+      "Jesli chcesz, zostaw telefon lub e-mail, a oddzwonimy.",
   }),
   en: Object.freeze({
     confirmButtonLabel: "Confirm estimate",
     confirmCta:
-      'If everything looks good, click "Confirm estimate" and I will pass it to a manager. If you have more questions, leave a message, phone number, or email and we will call you back.',
+      'If everything looks good, click "Confirm estimate" and I will pass it to a manager. If you want a callback, leave a phone number or email.',
     contactHint:
-      "If you have more questions, leave a message, phone number, or email and we will call you back.",
+      "If you want a callback, leave a phone number or email.",
   }),
   ru: Object.freeze({
     confirmButtonLabel: "Подтвердить смету",
     confirmCta:
-      'Если все верно, нажмите "Подтвердить смету", и я передам данные менеджеру. Если есть вопросы, оставьте сообщение, номер телефона или email, и мы перезвоним.',
+      'Если все верно, нажмите "Подтвердить смету", и я передам данные менеджеру. Хотите, чтобы мы связались? Оставьте телефон или email.',
     contactHint:
-      "Если есть вопросы, оставьте сообщение, номер телефона или email, и мы перезвоним.",
+      "Хотите, чтобы мы связались? Оставьте телефон или email.",
   }),
 });
 
