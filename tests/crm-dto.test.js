@@ -10,7 +10,6 @@ test("CRM DTO builder maps session payload to strict contract", () => {
     status: "confirmed",
     userMessages: [
       "Bathroom 6m2 in Warsaw",
-      "Start next week",
       "tel +48 600 700 800",
       "email test@example.com",
     ],
@@ -35,7 +34,6 @@ test("CRM DTO builder maps session payload to strict contract", () => {
 
   assert.equal(dto.source, "valik-ai-estimator");
   assert.equal(dto.customer.city, "Warsaw");
-  assert.equal(dto.customer.timeline, "next week");
   assert.equal(dto.customer.phone, "+48600700800");
   assert.equal(dto.customer.email, "test@example.com");
   assert.equal(dto.customer.note, "email test@example.com");

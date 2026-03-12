@@ -16,7 +16,6 @@ export const CrmLeadSchema = z.object({
   status: z.enum(["active", "needs_clarification", "ready_for_confirmation", "confirmed"]),
   customer: z.object({
     city: z.string().nullable(),
-    timeline: z.string().nullable(),
     name: z.string().nullable(),
     email: z.string().nullable(),
     phone: z.string().nullable(),
@@ -92,9 +91,6 @@ const CITY_ALIASES = [
   },
 ];
 
-const TIMELINE_PATTERN =
-  /\b(asap|urgent|tomorrow|next week|next month|\d+\s*(?:day|days|week|weeks|month|months)|pilne|szybko|jutro|pojutrze|w tym tygodniu|w przysz(?:\u0142|l)ym tygodniu|w przysz(?:\u0142|l)ym miesi(?:\u0105|a)cu|za\s+\d+\s*(?:dzien|dni|tydzien|tygodnie|tygodni|miesiac|miesiace|miesiecy)|\u0441\u0440\u043e\u0447\u043d\u043e|\u0441\u0435\u0433\u043e\u0434\u043d\u044f|\u0441\u0435\u0439\u0447\u0430\u0441|\u0437\u0430\u0432\u0442\u0440\u0430|\u043f\u043e\u0441\u043b\u0435\u0437\u0430\u0432\u0442\u0440\u0430|\u043d\u0430 \u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0435\u0439 \u043d\u0435\u0434\u0435\u043b\u0435|\u043d\u0430 \u0441\u043b\u0435\u0434\u0443\u044e\u0449\u0435\u043c \u043c\u0435\u0441\u044f\u0446\u0435|\u0447\u0435\u0440\u0435\u0437\s+\d+\s*(?:\u0434\u0435\u043d\u044c|\u0434\u043d\u044f|\u0434\u043d\u0435\u0439|\u043d\u0435\u0434\u0435\u043b[\u044f\u0438\u044e\u0435]|\u043c\u0435\u0441\u044f\u0446|\u043c\u0435\u0441\u044f\u0446\u0430|\u043c\u0435\u0441\u044f\u0446\u0435\u0432))\b/iu;
-
 const EMAIL_PATTERN = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
 const PHONE_PATTERN = /(\+?\d[\d\s().-]{6,}\d)/g;
 const NOTE_HINT_PATTERN =
@@ -107,17 +103,6 @@ function extractCity(messages) {
       if (match) {
         return match[0];
       }
-    }
-  }
-
-  return null;
-}
-
-function extractTimeline(messages) {
-  for (const message of messages) {
-    const match = message.match(TIMELINE_PATTERN);
-    if (match) {
-      return match[0];
     }
   }
 
@@ -196,7 +181,6 @@ export function buildCrmLeadDto(session) {
     status: session.status,
     customer: {
       city: extractCity(transcript),
-      timeline: extractTimeline(transcript),
       name: null,
       email: extractEmail(transcript),
       phone: extractPhone(transcript),

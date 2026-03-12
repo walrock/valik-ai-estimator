@@ -30,7 +30,6 @@ Keep these already configured:
 - `confirmedAt`
 - `status`
 - `customer.city`
-- `customer.timeline`
 - `customer.phone`
 - `customer.email`
 - `customer.note`
@@ -59,7 +58,6 @@ Suggested Telegram message template:
 New estimate confirmed
 session: {{$json.body.sessionId}}
 city: {{$json.body.customer.city || "n/a"}}
-timeline: {{$json.body.customer.timeline || "n/a"}}
 total: {{$json.body.estimate.total}} {{$json.body.estimate.currency}}
 ```
 
@@ -84,7 +82,6 @@ Map fields exactly from incoming JSON:
 
 - `sessionId`
 - `customer.city`
-- `customer.timeline`
 - `customer.phone`
 - `customer.email`
 - `customer.note`
