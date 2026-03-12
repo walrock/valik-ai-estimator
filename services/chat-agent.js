@@ -20,6 +20,8 @@ const PROMPTS = Object.freeze({
       "Opisz zakres prac oraz powierzchnie/ilosci.",
     ready:
       "Wstepna wycena jest gotowa. Jesli wszystko sie zgadza, kliknij \"Potwierdz wycene\", a przekaze dane do opiekuna. Jesli masz dodatkowe pytania, zostaw wiadomosc, numer telefonu lub e-mail, a oddzwonimy.",
+    contact:
+      "Dziekuje! Kontakt zapisany. Jesli wszystko sie zgadza, kliknij \"Potwierdz wycene\".",
     confirmed:
       "Wycena jest juz potwierdzona i przekazana do opiekuna. Aby przygotowac nowa wycene, rozpocznij nowa rozmowe.",
     clarifying:
@@ -32,6 +34,8 @@ const PROMPTS = Object.freeze({
       "Describe required works and area/quantity.",
     ready:
       "The draft estimate is ready. If everything looks good, click \"Confirm estimate\" and I will pass it to a manager. If you have more questions, leave a message, phone number, or email and we will call you back.",
+    contact:
+      "Thanks! Contact details saved. If everything looks good, click \"Confirm estimate\".",
     confirmed:
       "This estimate is already confirmed and handed over to a manager. To prepare a new one, please start a new chat.",
     clarifying:
@@ -43,6 +47,8 @@ const PROMPTS = Object.freeze({
     initial: "Опишите работы и площадь/количество.",
     ready:
       "Черновая смета готова. Если все верно, нажмите \"Подтвердить смету\", и я передам данные менеджеру. Если есть вопросы, оставьте сообщение, номер телефона или email, и мы перезвоним.",
+    contact:
+      "Спасибо! Контакт записан. Если все верно, нажмите \"Подтвердить смету\".",
     confirmed:
       "Эта смета уже подтверждена и передана менеджеру. Чтобы сделать новую смету, начните новый диалог.",
     clarifying:
@@ -93,6 +99,8 @@ const LANGUAGE_QUESTION_PATTERN =
   /(?:language|english|polish|russian|język|po polsku|по-рус|на каком языке)/i;
 const SCOPE_QUESTION_PATTERN =
   /(?:car|cars|automotive|машин|авто|samochod|samochody)/i;
+const EMAIL_PATTERN = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
+const PHONE_PATTERN = /(\+?\d[\d\s().-]{6,}\d)/g;
 
 const QUESTION_ANSWERS = Object.freeze({
   pl: Object.freeze({
@@ -146,7 +154,7 @@ function getSalesStyle(language) {
   return SALES_STYLE[normalizedLanguage] ?? SALES_STYLE.pl;
 }
 
-function enforceSalesTone(message, { status, language }) {
+function enforceSalesTone(message, { status, language, suppressContactHint = false }) {
   const text = String(message ?? "").trim();
   if (!text) {
     return text;
@@ -162,7 +170,7 @@ function enforceSalesTone(message, { status, language }) {
     if (!hasButtonLabel) {
       return `${text}\n${style.confirmCta}`;
     }
-    if (contactHint && !hasContactHint) {
+    if (!suppressContactHint && contactHint && !hasContactHint) {
       return `${text}\n${style.contactHint}`;
     }
     return text;
@@ -173,6 +181,26 @@ function enforceSalesTone(message, { status, language }) {
 
 function isQuestionLike(message) {
   return QUESTION_PATTERN.test(message) || QUESTION_WORD_PATTERN.test(message);
+}
+
+function hasContactSignals(message) {
+  if (!message) {
+    return false;
+  }
+
+  if (EMAIL_PATTERN.test(message)) {
+    return true;
+  }
+
+  const matches = String(message).matchAll(PHONE_PATTERN);
+  for (const match of matches) {
+    const digits = String(match[1] ?? "").replace(/\D/g, "");
+    if (digits.length >= 7) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 function hasProjectSignals(message) {
@@ -303,7 +331,7 @@ function ensureSessionShape(session) {
   };
 }
 
-function buildTemplateReply(status, questions, language) {
+function buildTemplateReply(status, questions, language, { contactOnly = false } = {}) {
   const pack = getLanguagePack(language);
 
   if (status === "confirmed") {
@@ -311,6 +339,9 @@ function buildTemplateReply(status, questions, language) {
   }
 
   if (status === "ready_for_confirmation") {
+    if (contactOnly && pack.contact) {
+      return pack.contact;
+    }
     return pack.ready;
   }
 
@@ -390,10 +421,19 @@ async function buildAssistantMessage({
   latestUserMessage,
   estimate,
   offTopic = false,
+  contactOnly = false,
 }) {
   const fallbackMessage = offTopic
     ? buildOffTopicFallback(status, questions, language)
-    : buildTemplateReply(status, questions, language);
+    : buildTemplateReply(status, questions, language, { contactOnly });
+
+  if (contactOnly) {
+    return enforceSalesTone(fallbackMessage, {
+      status,
+      language,
+      suppressContactHint: true,
+    });
+  }
 
   if (typeof composeAssistantMessage !== "function") {
     return enforceSalesTone(fallbackMessage, { status, language });
@@ -541,6 +581,11 @@ export function createChatAgent({ extractWorks, composeAssistantMessage = null }
 
       const status =
         missingFields.length === 0 ? "ready_for_confirmation" : "needs_clarification";
+      const contactOnly =
+        status === "ready_for_confirmation" &&
+        hasContactSignals(cleanedMessage) &&
+        !isQuestionLike(cleanedMessage) &&
+        !hasProjectSignals(cleanedMessage);
       const offTopic = isLikelyOffTopicMessage({
         message: cleanedMessage,
         extractedWorks: quantityResolved.works,
@@ -555,6 +600,7 @@ export function createChatAgent({ extractWorks, composeAssistantMessage = null }
         latestUserMessage: cleanedMessage,
         estimate,
         offTopic,
+        contactOnly,
       });
 
       const updatedSession = {
