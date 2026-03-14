@@ -38,22 +38,7 @@ export function calculateProject(works) {
 
   subtotal = Number(subtotal.toFixed(2));
   const appliedRules = [];
-  let total = subtotal;
-
-  if (total < pricing.minimum_order) {
-    const adjustment = Number((pricing.minimum_order - total).toFixed(2));
-
-    breakdown.push({
-      name: "minimum_order_adjustment",
-      quantity: 1,
-      unit: "order",
-      unitPrice: adjustment,
-      total: adjustment,
-    });
-
-    total = pricing.minimum_order;
-    appliedRules.push("minimum_order");
-  }
+  const total = subtotal;
 
   return { subtotal, total, breakdown, warnings, appliedRules };
 }

@@ -21,8 +21,6 @@ const LANGUAGE_PACKS = Object.freeze({
       confirmed: "potwierdzona",
     }),
     estimateLabel: "Wycena",
-    estimateSubtotalLabel: "Zakres prac",
-    estimateMinimumLabel: "Minimalne zlecenie",
     estimateTotalLabel: "Do zaplaty",
     estimateNotReady: "pojawi sie po uzupelnieniu kluczowych informacji",
     warningsLabel: "Uwagi",
@@ -112,8 +110,6 @@ const LANGUAGE_PACKS = Object.freeze({
       confirmed: "confirmed",
     }),
     estimateLabel: "Estimate",
-    estimateSubtotalLabel: "Work subtotal",
-    estimateMinimumLabel: "Minimum order",
     estimateTotalLabel: "Total",
     estimateNotReady: "will appear after key details are provided",
     warningsLabel: "Notes",
@@ -202,8 +198,6 @@ const LANGUAGE_PACKS = Object.freeze({
       confirmed: "\u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0430",
     }),
     estimateLabel: "\u0421\u043c\u0435\u0442\u0430",
-    estimateSubtotalLabel: "\u0421\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u044c \u0440\u0430\u0431\u043e\u0442",
-    estimateMinimumLabel: "\u041c\u0438\u043d\u0438\u043c\u0430\u043b\u044c\u043d\u044b\u0439 \u0437\u0430\u043a\u0430\u0437",
     estimateTotalLabel: "\u041a \u043e\u043f\u043b\u0430\u0442\u0435",
     estimateNotReady:
       "\u043f\u043e\u044f\u0432\u0438\u0442\u0441\u044f \u043f\u043e\u0441\u043b\u0435 \u0443\u043a\u0430\u0437\u0430\u043d\u0438\u044f \u043a\u043b\u044e\u0447\u0435\u0432\u044b\u0445 \u0434\u0430\u043d\u043d\u044b\u0445",
@@ -611,11 +605,7 @@ function renderEstimate(payload) {
     return;
   }
 
-  const visibleBreakdown = (estimate.breakdown ?? []).filter(
-    (line) => line?.name !== "minimum_order_adjustment",
-  );
-  const hasMinimumOrder = (estimate.appliedRules ?? []).includes("minimum_order");
-  const rows = visibleBreakdown
+  const rows = (estimate.breakdown ?? [])
     .map(
       (line) =>
         `<li>${formatWorkName(line.name)}: ${formatNumber(line.quantity, {
@@ -628,8 +618,6 @@ function renderEstimate(payload) {
 
   estimateEl.innerHTML = `
     <strong>${pack.estimateLabel}:</strong>
-    ${hasMinimumOrder ? `<div>${pack.estimateSubtotalLabel}: ${formatMoney(estimate.subtotal)}</div>` : ""}
-    ${hasMinimumOrder ? `<div>${pack.estimateMinimumLabel}: ${formatMoney(estimate.total)}</div>` : ""}
     <div>${pack.estimateTotalLabel}: ${formatMoney(estimate.total)}</div>
     ${rows ? `<ul>${rows}</ul>` : ""}
   `;

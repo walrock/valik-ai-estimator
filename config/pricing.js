@@ -1,6 +1,4 @@
 export const pricing = {
-  minimum_order: 1000,
-
   painting: {
     project_design: { unit: "m2", price: 250 },
     preparation: { unit: "m2", price: 10 },

@@ -1,6 +1,6 @@
 import { pricing } from "../config/pricing.js";
 
-const META_KEYS = new Set(["minimum_order"]);
+const META_KEYS = new Set();
 
 export const WORK_CATEGORIES = Object.freeze(
   Object.keys(pricing).filter((key) => !META_KEYS.has(key)),

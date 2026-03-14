@@ -2,15 +2,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { calculateProject } from "../engine/calculator.js";
 
-test("calculator computes subtotal and applies minimum order adjustment", () => {
+test("calculator computes subtotal without applying minimum order", () => {
   const result = calculateProject([
     { category: "tiling", type: "tile_30_60", quantity: 6 },
   ]);
 
   assert.equal(result.subtotal, 840);
-  assert.equal(result.total, 1000);
-  assert.deepEqual(result.appliedRules, ["minimum_order"]);
-  assert.equal(result.breakdown.at(-1).name, "minimum_order_adjustment");
+  assert.equal(result.total, 840);
+  assert.deepEqual(result.appliedRules, []);
+  assert.equal(result.breakdown.at(-1).name, "tile_30_60");
 });
 
 test("calculator skips invalid items and returns warnings", () => {
@@ -23,7 +23,7 @@ test("calculator skips invalid items and returns warnings", () => {
   assert.equal(result.subtotal, 250);
 });
 
-test("calculator leaves total equal to subtotal when minimum order is not needed", () => {
+test("calculator leaves total equal to subtotal for larger estimates", () => {
   const result = calculateProject([
     { category: "tiling", type: "tile_60_120", quantity: 10 },
     { category: "painting", type: "wallpaper_install", quantity: 10 },
