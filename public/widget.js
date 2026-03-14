@@ -5,6 +5,8 @@ const state = {
   language: "pl",
 };
 
+const runtimeConfig = resolveRuntimeConfig();
+
 const LOCALES = Object.freeze({
   pl: "pl-PL",
   en: "en-US",
@@ -26,6 +28,7 @@ const LANGUAGE_PACKS = Object.freeze({
     warningsLabel: "Uwagi",
     sendLabel: "Wyslij",
     confirmLabel: "Potwierdz wycene",
+    whatsappLabel: "Skontaktuj sie na WhatsApp",
     newChatLabel: "Nowa wycena",
     placeholder:
       "Np. Lazienka 6m2, skucie starych plytek, plytki 60x60...",
@@ -99,6 +102,12 @@ const LANGUAGE_PACKS = Object.freeze({
     }),
     errorPrefix: "Blad",
     confirmErrorPrefix: "Blad potwierdzenia",
+    whatsappErrorPrefix: "Blad WhatsApp",
+    whatsappPreview: "kontakt przez WhatsApp dostepny po przygotowaniu wyceny",
+    whatsappOpened:
+      "Otwieram WhatsApp z gotowa wiadomoscia do dalszej rozmowy.",
+    whatsappReadyHint:
+      'Jesli ta wycena Ci odpowiada, kliknij "Skontaktuj sie na WhatsApp", a przejdziesz od razu do rozmowy.',
     noneLabel: "brak",
   }),
   en: Object.freeze({
@@ -115,6 +124,7 @@ const LANGUAGE_PACKS = Object.freeze({
     warningsLabel: "Notes",
     sendLabel: "Send",
     confirmLabel: "Confirm estimate",
+    whatsappLabel: "Contact us on WhatsApp",
     newChatLabel: "New estimate",
     placeholder:
       "Example: Bathroom 6m2, remove old tiles, tile 60x60...",
@@ -187,6 +197,12 @@ const LANGUAGE_PACKS = Object.freeze({
     }),
     errorPrefix: "Error",
     confirmErrorPrefix: "Confirmation error",
+    whatsappErrorPrefix: "WhatsApp error",
+    whatsappPreview: "WhatsApp contact becomes available after the estimate is ready",
+    whatsappOpened:
+      "Opening WhatsApp with a prepared message for the next discussion.",
+    whatsappReadyHint:
+      'If this estimate works for you, click "Contact us on WhatsApp" to continue the conversation.',
     noneLabel: "n/a",
   }),
   ru: Object.freeze({
@@ -204,6 +220,7 @@ const LANGUAGE_PACKS = Object.freeze({
     warningsLabel: "\u0417\u0430\u043c\u0435\u0442\u043a\u0438",
     sendLabel: "\u041e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u044c",
     confirmLabel: "\u041f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044c \u0441\u043c\u0435\u0442\u0443",
+    whatsappLabel: "\u0421\u0432\u044f\u0437\u0430\u0442\u044c\u0441\u044f \u0432 WhatsApp",
     newChatLabel: "\u041d\u043e\u0432\u0430\u044f \u0441\u043c\u0435\u0442\u0430",
     placeholder:
       "\u041d\u0430\u043f\u0440.: \u0412\u0430\u043d\u043d\u0430\u044f 6\u043c2, \u0434\u0435\u043c\u043e\u043d\u0442\u0430\u0436 \u0441\u0442\u0430\u0440\u043e\u0439 \u043f\u043b\u0438\u0442\u043a\u0438, \u043f\u043b\u0438\u0442\u043a\u0430 60x60...",
@@ -280,6 +297,13 @@ const LANGUAGE_PACKS = Object.freeze({
     }),
     errorPrefix: "\u041e\u0448\u0438\u0431\u043a\u0430",
     confirmErrorPrefix: "\u041e\u0448\u0438\u0431\u043a\u0430 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0438\u044f",
+    whatsappErrorPrefix: "\u041e\u0448\u0438\u0431\u043a\u0430 WhatsApp",
+    whatsappPreview:
+      "\u0441\u0432\u044f\u0437\u044c \u0447\u0435\u0440\u0435\u0437 WhatsApp \u0441\u0442\u0430\u043d\u0435\u0442 \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u0430 \u043f\u043e\u0441\u043b\u0435 \u0440\u0430\u0441\u0447\u0435\u0442\u0430 \u0441\u043c\u0435\u0442\u044b",
+    whatsappOpened:
+      "\u041e\u0442\u043a\u0440\u044b\u0432\u0430\u044e WhatsApp \u0441 \u0433\u043e\u0442\u043e\u0432\u044b\u043c \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435\u043c \u0434\u043b\u044f \u043e\u0431\u0441\u0443\u0436\u0434\u0435\u043d\u0438\u044f.",
+    whatsappReadyHint:
+      '\u0415\u0441\u043b\u0438 \u0441\u043c\u0435\u0442\u0430 \u0432\u0430\u043c \u043f\u043e\u0434\u0445\u043e\u0434\u0438\u0442, \u043d\u0430\u0436\u043c\u0438\u0442\u0435 "\u0421\u0432\u044f\u0437\u0430\u0442\u044c\u0441\u044f \u0432 WhatsApp", \u0438 \u0432\u044b \u0441\u0440\u0430\u0437\u0443 \u043f\u0435\u0440\u0435\u0439\u0434\u0435\u0442\u0435 \u043a \u0434\u0438\u0430\u043b\u043e\u0433\u0443.',
     noneLabel: "\u043d\u0435\u0442",
   }),
 });
@@ -481,6 +505,18 @@ function getLanguagePack(language) {
   return LANGUAGE_PACKS[language] ?? LANGUAGE_PACKS.pl;
 }
 
+function resolveRuntimeConfig() {
+  const params = new URLSearchParams(window.location.search);
+  const whatsappPhone = String(
+    params.get("whatsapp") ?? params.get("whatsappPhone") ?? "",
+  ).replace(/[^\d]/g, "");
+
+  return {
+    whatsappPhone,
+    isWhatsAppMode: whatsappPhone.length >= 7,
+  };
+}
+
 function getLocale(language) {
   return LOCALES[language] ?? LOCALES.pl;
 }
@@ -534,7 +570,9 @@ function setLanguage(language) {
     sendBtn.textContent = pack.sendLabel;
   }
   if (confirmBtn) {
-    confirmBtn.textContent = pack.confirmLabel;
+    confirmBtn.textContent = runtimeConfig.isWhatsAppMode
+      ? pack.whatsappLabel
+      : pack.confirmLabel;
   }
   if (newChatBtn) {
     newChatBtn.textContent = pack.newChatLabel ?? "New estimate";
@@ -545,7 +583,15 @@ function setLanguage(language) {
 
   setStatus(state.status);
   renderEstimate({ estimate: state.lastEstimate, status: state.status });
-    crmResultEl.innerHTML = `<strong>${pack.crmPreviewTitle}:</strong> ${pack.crmAvailableAfter}`;
+  if (crmResultEl) {
+    if (runtimeConfig.isWhatsAppMode) {
+      crmResultEl.hidden = false;
+      crmResultEl.innerHTML = `<strong>WhatsApp:</strong> ${pack.whatsappPreview}`;
+    } else {
+      crmResultEl.hidden = false;
+      crmResultEl.innerHTML = `<strong>${pack.crmPreviewTitle}:</strong> ${pack.crmAvailableAfter}`;
+    }
+  }
 }
 
 function scrollMessagesToBottom({ smooth = true } = {}) {
@@ -590,6 +636,40 @@ function normalizeAssistantMessage(text) {
   }
 
   return withBullets;
+}
+
+function adaptAssistantMessageForWhatsApp(text) {
+  const pack = getLanguagePack(state.language);
+  const raw = String(text ?? "").trim();
+  if (!raw || !runtimeConfig.isWhatsAppMode || state.status !== "ready_for_confirmation") {
+    return raw;
+  }
+
+  const cleanedLines = raw
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((line) => {
+      if (state.language === "ru") {
+        return !/подтвердить смету|оставьте телефон|оставьте .*email/i.test(line);
+      }
+
+      if (state.language === "en") {
+        return !/confirm estimate|leave a phone number|leave a phone number or email/i.test(
+          line,
+        );
+      }
+
+      return !/potwierdz wycene|zostaw telefon|zostaw telefon lub e-mail/i.test(
+        line,
+      );
+    });
+
+  if (!cleanedLines.some((line) => line.includes(pack.whatsappReadyHint))) {
+    cleanedLines.push(pack.whatsappReadyHint);
+  }
+
+  return cleanedLines.join("\n\n");
 }
 
 function renderEstimate(payload) {
@@ -642,12 +722,13 @@ function renderResponse(payload) {
   setStatus(state.status);
 
   if (payload.assistantMessage) {
-    appendMessage(payload.assistantMessage, "assistant");
+    appendMessage(adaptAssistantMessageForWhatsApp(payload.assistantMessage), "assistant");
   }
 
   renderEstimate(payload);
   renderWarnings(payload);
-  confirmBtn.disabled = state.status !== "ready_for_confirmation";
+  confirmBtn.disabled =
+    state.status !== "ready_for_confirmation" && state.status !== "confirmed";
   scrollMessagesToBottom();
 }
 
@@ -696,7 +777,8 @@ async function handleSend(message) {
     appendMessage(`${pack.errorPrefix}: ${error.message}`, "assistant");
   } finally {
     sendBtn.disabled = false;
-    confirmBtn.disabled = state.status !== "ready_for_confirmation";
+    confirmBtn.disabled =
+      state.status !== "ready_for_confirmation" && state.status !== "confirmed";
   }
 }
 
@@ -704,17 +786,25 @@ function resetConversation() {
   state.sessionId = null;
   state.status = "active";
   state.lastEstimate = null;
+  const pack = getLanguagePack(state.language);
 
   messagesEl.innerHTML = "";
   setStatus(state.status);
   renderEstimate({ estimate: null, status: state.status });
   confirmBtn.disabled = true;
   sendBtn.disabled = false;
-  crmResultEl.innerHTML = `<strong>${getLanguagePack(state.language).crmPreviewTitle}:</strong> ${getLanguagePack(state.language).crmAvailableAfter}`;
+  crmResultEl.innerHTML = runtimeConfig.isWhatsAppMode
+    ? `<strong>WhatsApp:</strong> ${pack.whatsappPreview}`
+    : `<strong>${pack.crmPreviewTitle}:</strong> ${pack.crmAvailableAfter}`;
   scrollMessagesToBottom({ smooth: false });
 }
 
 async function handleConfirm() {
+  if (runtimeConfig.isWhatsAppMode) {
+    handleWhatsAppContact();
+    return;
+  }
+
   if (!state.sessionId) {
     return;
   }
@@ -771,9 +861,79 @@ async function handleConfirm() {
     const pack = getLanguagePack(state.language);
     appendMessage(`${pack.confirmErrorPrefix}: ${error.message}`, "assistant");
   } finally {
-    confirmBtn.disabled = state.status !== "ready_for_confirmation";
+    confirmBtn.disabled =
+      state.status !== "ready_for_confirmation" && state.status !== "confirmed";
     scrollMessagesToBottom();
   }
+}
+
+function buildWhatsAppMessage() {
+  const pack = getLanguagePack(state.language);
+  const estimate = state.lastEstimate;
+  const rows = (estimate?.breakdown ?? [])
+    .map(
+      (line) =>
+        `- ${formatWorkName(line.name)}: ${formatNumber(line.quantity, {
+          maximumFractionDigits: 4,
+        })} ${formatUnit(line.unit)} x ${formatMoney(line.unitPrice)} = ${formatMoney(line.total)}`,
+    )
+    .join("\n");
+
+  if (state.language === "ru") {
+    return [
+      "Здравствуйте! Хочу обсудить смету с сайта Pomorskie Malowania.",
+      state.sessionId ? `Сессия: ${state.sessionId}` : null,
+      estimate ? `Итого: ${formatMoney(estimate.total)}` : null,
+      rows ? "Работы:\n" + rows : null,
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  if (state.language === "en") {
+    return [
+      "Hello! I would like to discuss the estimate from the Pomorskie Malowania website.",
+      state.sessionId ? `Session: ${state.sessionId}` : null,
+      estimate ? `Total: ${formatMoney(estimate.total)}` : null,
+      rows ? "Works:\n" + rows : null,
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  return [
+    "Dzien dobry! Chce omowic wycene ze strony Pomorskie Malowania.",
+    state.sessionId ? `Sesja: ${state.sessionId}` : null,
+    estimate ? `Lacznie: ${formatMoney(estimate.total)}` : null,
+    rows ? "Zakres prac:\n" + rows : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function handleWhatsAppContact() {
+  const pack = getLanguagePack(state.language);
+  if (!runtimeConfig.isWhatsAppMode || !runtimeConfig.whatsappPhone) {
+    appendMessage(`${pack.whatsappErrorPrefix}: WhatsApp is not configured.`, "assistant");
+    return;
+  }
+
+  if (
+    !state.lastEstimate ||
+    (state.status !== "ready_for_confirmation" && state.status !== "confirmed")
+  ) {
+    appendMessage(`${pack.whatsappErrorPrefix}: ${pack.estimateNotReady}`, "assistant");
+    return;
+  }
+
+  const message = buildWhatsAppMessage();
+  const url = `https://wa.me/${runtimeConfig.whatsappPhone}?text=${encodeURIComponent(message)}`;
+  const popup = window.open(url, "_blank", "noopener,noreferrer");
+  if (!popup) {
+    window.location.href = url;
+  }
+
+  appendMessage(pack.whatsappOpened, "assistant");
 }
 
 chatForm.addEventListener("submit", async (event) => {

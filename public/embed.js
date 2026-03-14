@@ -11,6 +11,11 @@
   const height = Number.isFinite(parsedHeight) && parsedHeight >= 320 ? parsedHeight : 760;
   const maxWidth = script.dataset.maxWidth || "980px";
   const title = script.dataset.title || "Kalkulator wyceny";
+  const whatsappPhone = (script.dataset.whatsappPhone || "").trim();
+
+  if (whatsappPhone) {
+    widgetUrl.searchParams.set("whatsapp", whatsappPhone);
+  }
 
   const container = document.createElement("div");
   container.style.width = "100%";
