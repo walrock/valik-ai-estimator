@@ -5,6 +5,12 @@ const state = {
   language: "pl",
 };
 
+const LOCALES = Object.freeze({
+  pl: "pl-PL",
+  en: "en-US",
+  ru: "ru-RU",
+});
+
 const LANGUAGE_PACKS = Object.freeze({
   pl: Object.freeze({
     statusLabel: "Status",
@@ -15,7 +21,9 @@ const LANGUAGE_PACKS = Object.freeze({
       confirmed: "potwierdzona",
     }),
     estimateLabel: "Wycena",
-    estimateTotalLabel: "Lacznie",
+    estimateSubtotalLabel: "Zakres prac",
+    estimateMinimumLabel: "Minimalne zlecenie",
+    estimateTotalLabel: "Do zaplaty",
     estimateNotReady: "pojawi sie po uzupelnieniu kluczowych informacji",
     warningsLabel: "Uwagi",
     sendLabel: "Wyslij",
@@ -42,36 +50,37 @@ const LANGUAGE_PACKS = Object.freeze({
       unknown: "nieznane",
     }),
     unitLabels: Object.freeze({
+      m2: "m2",
       pcs: "szt",
       order: "zlecenie",
     }),
     workLabels: Object.freeze({
-      project_design: "projekt",
-      preparation: "przygotowanie",
-      putty_2_layers: "szpachlowanie 2 warstwy",
+      project_design: "projekt i pomiar",
+      preparation: "przygotowanie powierzchni",
+      putty_2_layers: "szpachlowanie, 2 warstwy",
       priming: "gruntowanie",
-      primer_paint: "grunt i farba",
-      paint_2_layers: "malowanie 2 warstwy",
+      primer_paint: "gruntowanie z malowaniem",
+      paint_2_layers: "malowanie, 2 warstwy",
       wallpaper_install: "tapetowanie",
       wallpaper_remove: "usuniecie tapety",
-      ceiling: "sufit GK",
-      wall_frame: "konstrukcja sciany GK",
-      wall_glue: "klejenie GK",
-      partition_1_layer: "scianka 1 warstwa GK",
-      partition_2_layer: "scianka 2 warstwy GK",
-      demolition_with_lift: "demontaz z winda",
-      demolition_no_lift: "demontaz bez windy",
-      leveling: "wyrownanie podloza",
-      tile_10_15: "plytki 10x15",
-      tile_30_60: "plytki 30x60",
-      tile_60_120: "plytki 60x120",
-      mosaic: "mozaika",
-      stone: "kamien",
+      ceiling: "sufit podwieszany GK",
+      wall_frame: "stelaz pod sciane GK",
+      wall_glue: "klejenie plyt GK",
+      partition_1_layer: "scianka GK, 1 warstwa",
+      partition_2_layer: "scianka GK, 2 warstwy",
+      demolition_with_lift: "demontaz plytek, budynek z winda",
+      demolition_no_lift: "demontaz plytek, bez windy",
+      leveling: "wyrownanie podloza pod plytki",
+      tile_10_15: "ukladanie plytek 10x15",
+      tile_30_60: "ukladanie plytek 30x60",
+      tile_60_120: "ukladanie plytek 60x120",
+      mosaic: "ukladanie mozaiki",
+      stone: "ukladanie kamienia",
       waterproofing: "hydroizolacja",
-      laminate: "panel",
+      laminate: "ukladanie paneli",
       parquet_glue: "parkiet klejony",
       parquet_click: "parkiet na klik",
-      carpet: "wykladzina",
+      carpet: "ukladanie wykladziny",
       water_point: "punkt wodny",
       heating_point: "punkt grzewczy",
       toilet_install: "montaz WC",
@@ -103,6 +112,8 @@ const LANGUAGE_PACKS = Object.freeze({
       confirmed: "confirmed",
     }),
     estimateLabel: "Estimate",
+    estimateSubtotalLabel: "Work subtotal",
+    estimateMinimumLabel: "Minimum order",
     estimateTotalLabel: "Total",
     estimateNotReady: "will appear after key details are provided",
     warningsLabel: "Notes",
@@ -130,31 +141,32 @@ const LANGUAGE_PACKS = Object.freeze({
       unknown: "unknown",
     }),
     unitLabels: Object.freeze({
+      m2: "m2",
       pcs: "pcs",
       order: "order",
     }),
     workLabels: Object.freeze({
-      project_design: "project design",
-      preparation: "preparation",
-      putty_2_layers: "putty 2 coats",
+      project_design: "project planning and measurement",
+      preparation: "surface preparation",
+      putty_2_layers: "putty, 2 coats",
       priming: "priming",
-      primer_paint: "primer + paint",
-      paint_2_layers: "painting 2 coats",
-      wallpaper_install: "wallpaper install",
+      primer_paint: "priming with painting",
+      paint_2_layers: "painting, 2 coats",
+      wallpaper_install: "wallpaper installation",
       wallpaper_remove: "wallpaper removal",
-      ceiling: "drywall ceiling",
+      ceiling: "drywall suspended ceiling",
       wall_frame: "drywall wall frame",
-      wall_glue: "drywall glue",
-      partition_1_layer: "partition 1 layer",
-      partition_2_layer: "partition 2 layers",
-      demolition_with_lift: "demolition with lift",
-      demolition_no_lift: "demolition without lift",
-      leveling: "surface leveling",
-      tile_10_15: "tiles 10x15",
-      tile_30_60: "tiles 30x60",
-      tile_60_120: "tiles 60x120",
-      mosaic: "mosaic",
-      stone: "stone",
+      wall_glue: "drywall board installation",
+      partition_1_layer: "drywall partition, 1 layer",
+      partition_2_layer: "drywall partition, 2 layers",
+      demolition_with_lift: "tile removal, building with lift",
+      demolition_no_lift: "tile removal, no lift",
+      leveling: "surface leveling for tiling",
+      tile_10_15: "tile installation 10x15",
+      tile_30_60: "tile installation 30x60",
+      tile_60_120: "tile installation 60x120",
+      mosaic: "mosaic installation",
+      stone: "stone installation",
       waterproofing: "waterproofing",
       laminate: "laminate",
       parquet_glue: "parquet (glue)",
@@ -190,7 +202,9 @@ const LANGUAGE_PACKS = Object.freeze({
       confirmed: "\u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0430",
     }),
     estimateLabel: "\u0421\u043c\u0435\u0442\u0430",
-    estimateTotalLabel: "\u0418\u0442\u043e\u0433\u043e",
+    estimateSubtotalLabel: "\u0421\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u044c \u0440\u0430\u0431\u043e\u0442",
+    estimateMinimumLabel: "\u041c\u0438\u043d\u0438\u043c\u0430\u043b\u044c\u043d\u044b\u0439 \u0437\u0430\u043a\u0430\u0437",
+    estimateTotalLabel: "\u041a \u043e\u043f\u043b\u0430\u0442\u0435",
     estimateNotReady:
       "\u043f\u043e\u044f\u0432\u0438\u0442\u0441\u044f \u043f\u043e\u0441\u043b\u0435 \u0443\u043a\u0430\u0437\u0430\u043d\u0438\u044f \u043a\u043b\u044e\u0447\u0435\u0432\u044b\u0445 \u0434\u0430\u043d\u043d\u044b\u0445",
     warningsLabel: "\u0417\u0430\u043c\u0435\u0442\u043a\u0438",
@@ -219,36 +233,37 @@ const LANGUAGE_PACKS = Object.freeze({
       unknown: "\u043d\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043d\u043e",
     }),
     unitLabels: Object.freeze({
+      m2: "\u043c2",
       pcs: "\u0448\u0442",
       order: "\u0437\u0430\u043a\u0430\u0437",
     }),
     workLabels: Object.freeze({
-      project_design: "\u043f\u0440\u043e\u0435\u043a\u0442",
-      preparation: "\u043f\u043e\u0434\u0433\u043e\u0442\u043e\u0432\u043a\u0430",
-      putty_2_layers: "\u0448\u043f\u0430\u043a\u043b\u0435\u0432\u043a\u0430 2 \u0441\u043b\u043e\u044f",
+      project_design: "\u043f\u0440\u043e\u0435\u043a\u0442 \u0438 \u0437\u0430\u043c\u0435\u0440",
+      preparation: "\u043f\u043e\u0434\u0433\u043e\u0442\u043e\u0432\u043a\u0430 \u043f\u043e\u0432\u0435\u0440\u0445\u043d\u043e\u0441\u0442\u0438",
+      putty_2_layers: "\u0448\u043f\u0430\u043a\u043b\u0435\u0432\u043a\u0430, 2 \u0441\u043b\u043e\u044f",
       priming: "\u0433\u0440\u0443\u043d\u0442\u043e\u0432\u043a\u0430",
-      primer_paint: "\u0433\u0440\u0443\u043d\u0442 + \u043a\u0440\u0430\u0441\u043a\u0430",
-      paint_2_layers: "\u043f\u043e\u043a\u0440\u0430\u0441\u043a\u0430 2 \u0441\u043b\u043e\u044f",
+      primer_paint: "\u0433\u0440\u0443\u043d\u0442\u043e\u0432\u043a\u0430 \u0441 \u043f\u043e\u043a\u0440\u0430\u0441\u043a\u043e\u0439",
+      paint_2_layers: "\u043f\u043e\u043a\u0440\u0430\u0441\u043a\u0430, 2 \u0441\u043b\u043e\u044f",
       wallpaper_install: "\u043f\u043e\u043a\u043b\u0435\u0439\u043a\u0430 \u043e\u0431\u043e\u0435\u0432",
       wallpaper_remove: "\u0441\u043d\u044f\u0442\u0438\u0435 \u043e\u0431\u043e\u0435\u0432",
-      ceiling: "\u043f\u043e\u0442\u043e\u043b\u043e\u043a \u0413\u041a",
-      wall_frame: "\u043a\u0430\u0440\u043a\u0430\u0441 \u0441\u0442\u0435\u043d\u044b \u0413\u041a",
-      wall_glue: "\u043a\u043b\u0435\u0439 \u0413\u041a",
-      partition_1_layer: "\u043f\u0435\u0440\u0435\u0433\u043e\u0440\u043e\u0434\u043a\u0430 1 \u0441\u043b\u043e\u0439",
-      partition_2_layer: "\u043f\u0435\u0440\u0435\u0433\u043e\u0440\u043e\u0434\u043a\u0430 2 \u0441\u043b\u043e\u044f",
-      demolition_with_lift: "\u0434\u0435\u043c\u043e\u043d\u0442\u0430\u0436 \u0441 \u043b\u0438\u0444\u0442\u043e\u043c",
-      demolition_no_lift: "\u0434\u0435\u043c\u043e\u043d\u0442\u0430\u0436 \u0431\u0435\u0437 \u043b\u0438\u0444\u0442\u0430",
-      leveling: "\u0432\u044b\u0440\u0430\u0432\u043d\u0438\u0432\u0430\u043d\u0438\u0435",
-      tile_10_15: "\u043f\u043b\u0438\u0442\u043a\u0430 10x15",
-      tile_30_60: "\u043f\u043b\u0438\u0442\u043a\u0430 30x60",
-      tile_60_120: "\u043f\u043b\u0438\u0442\u043a\u0430 60x120",
-      mosaic: "\u043c\u043e\u0437\u0430\u0438\u043a\u0430",
-      stone: "\u043a\u0430\u043c\u0435\u043d\u044c",
+      ceiling: "\u043f\u043e\u0434\u0432\u0435\u0441\u043d\u043e\u0439 \u043f\u043e\u0442\u043e\u043b\u043e\u043a \u0413\u041a",
+      wall_frame: "\u043a\u0430\u0440\u043a\u0430\u0441 \u043f\u043e\u0434 \u0441\u0442\u0435\u043d\u0443 \u0413\u041a",
+      wall_glue: "\u043c\u043e\u043d\u0442\u0430\u0436 \u043b\u0438\u0441\u0442\u043e\u0432 \u0413\u041a",
+      partition_1_layer: "\u043f\u0435\u0440\u0435\u0433\u043e\u0440\u043e\u0434\u043a\u0430 \u0413\u041a, 1 \u0441\u043b\u043e\u0439",
+      partition_2_layer: "\u043f\u0435\u0440\u0435\u0433\u043e\u0440\u043e\u0434\u043a\u0430 \u0413\u041a, 2 \u0441\u043b\u043e\u044f",
+      demolition_with_lift: "\u0434\u0435\u043c\u043e\u043d\u0442\u0430\u0436 \u043f\u043b\u0438\u0442\u043a\u0438, \u0434\u043e\u043c \u0441 \u043b\u0438\u0444\u0442\u043e\u043c",
+      demolition_no_lift: "\u0434\u0435\u043c\u043e\u043d\u0442\u0430\u0436 \u043f\u043b\u0438\u0442\u043a\u0438, \u0431\u0435\u0437 \u043b\u0438\u0444\u0442\u0430",
+      leveling: "\u0432\u044b\u0440\u0430\u0432\u043d\u0438\u0432\u0430\u043d\u0438\u0435 \u043e\u0441\u043d\u043e\u0432\u0430\u043d\u0438\u044f \u043f\u043e\u0434 \u043f\u043b\u0438\u0442\u043a\u0443",
+      tile_10_15: "\u0443\u043a\u043b\u0430\u0434\u043a\u0430 \u043f\u043b\u0438\u0442\u043a\u0438 10x15",
+      tile_30_60: "\u0443\u043a\u043b\u0430\u0434\u043a\u0430 \u043f\u043b\u0438\u0442\u043a\u0438 30x60",
+      tile_60_120: "\u0443\u043a\u043b\u0430\u0434\u043a\u0430 \u043f\u043b\u0438\u0442\u043a\u0438 60x120",
+      mosaic: "\u0443\u043a\u043b\u0430\u0434\u043a\u0430 \u043c\u043e\u0437\u0430\u0438\u043a\u0438",
+      stone: "\u0443\u043a\u043b\u0430\u0434\u043a\u0430 \u043a\u0430\u043c\u043d\u044f",
       waterproofing: "\u0433\u0438\u0434\u0440\u043e\u0438\u0437\u043e\u043b\u044f\u0446\u0438\u044f",
-      laminate: "\u043b\u0430\u043c\u0438\u043d\u0430\u0442",
+      laminate: "\u0443\u043a\u043b\u0430\u0434\u043a\u0430 \u043b\u0430\u043c\u0438\u043d\u0430\u0442\u0430",
       parquet_glue: "\u043f\u0430\u0440\u043a\u0435\u0442 (\u043a\u043b\u0435\u0439)",
       parquet_click: "\u043f\u0430\u0440\u043a\u0435\u0442 (\u0437\u0430\u043c\u043e\u043a)",
-      carpet: "\u043a\u043e\u0432\u0440\u043e\u043b\u0438\u043d",
+      carpet: "\u0443\u043a\u043b\u0430\u0434\u043a\u0430 \u043a\u043e\u0432\u0440\u043e\u043b\u0438\u043d\u0430",
       water_point: "\u0442\u043e\u0447\u043a\u0430 \u0432\u043e\u0434\u044b",
       heating_point: "\u0442\u043e\u0447\u043a\u0430 \u043e\u0442\u043e\u043f\u043b\u0435\u043d\u0438\u044f",
       toilet_install: "\u0443\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0430 \u0443\u043d\u0438\u0442\u0430\u0437\u0430",
@@ -289,6 +304,10 @@ function getLanguagePack(language) {
   return LANGUAGE_PACKS[language] ?? LANGUAGE_PACKS.pl;
 }
 
+function getLocale(language) {
+  return LOCALES[language] ?? LOCALES.pl;
+}
+
 function formatWorkName(name) {
   const pack = getLanguagePack(state.language);
   const label = pack.workLabels?.[name];
@@ -302,6 +321,22 @@ function formatWorkName(name) {
 function formatUnit(unit) {
   const pack = getLanguagePack(state.language);
   return pack.unitLabels?.[unit] ?? unit;
+}
+
+function formatNumber(value, { maximumFractionDigits = 2 } = {}) {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) {
+    return String(value ?? "");
+  }
+
+  return new Intl.NumberFormat(getLocale(state.language), {
+    minimumFractionDigits: 0,
+    maximumFractionDigits,
+  }).format(numericValue);
+}
+
+function formatMoney(value) {
+  return `${formatNumber(value)} PLN`;
 }
 
 function formatDeliveryStatus(status) {
@@ -391,18 +426,23 @@ function renderEstimate(payload) {
   const visibleBreakdown = (estimate.breakdown ?? []).filter(
     (line) => line?.name !== "minimum_order_adjustment",
   );
+  const hasMinimumOrder = (estimate.appliedRules ?? []).includes("minimum_order");
   const rows = visibleBreakdown
     .map(
       (line) =>
-        `<li>${formatWorkName(line.name)}: ${line.quantity} ${formatUnit(
+        `<li>${formatWorkName(line.name)}: ${formatNumber(line.quantity, {
+          maximumFractionDigits: 4,
+        })} ${formatUnit(
           line.unit,
-        )} x ${line.unitPrice} = ${line.total} PLN</li>`,
+        )} x ${formatMoney(line.unitPrice)} = ${formatMoney(line.total)}</li>`,
     )
     .join("");
 
   estimateEl.innerHTML = `
     <strong>${pack.estimateLabel}:</strong>
-    <div>${pack.estimateTotalLabel}: ${estimate.total} PLN</div>
+    ${hasMinimumOrder ? `<div>${pack.estimateSubtotalLabel}: ${formatMoney(estimate.subtotal)}</div>` : ""}
+    ${hasMinimumOrder ? `<div>${pack.estimateMinimumLabel}: ${formatMoney(estimate.total)}</div>` : ""}
+    <div>${pack.estimateTotalLabel}: ${formatMoney(estimate.total)}</div>
     ${rows ? `<ul>${rows}</ul>` : ""}
   `;
 }
@@ -548,7 +588,7 @@ async function handleConfirm() {
       <div>${crmLabels.city}: ${crmCustomer.city ?? noneLabel}</div>
       <div>${crmLabels.contact}: ${contactSummary || noneLabel}</div>
       <div>${crmLabels.note}: ${crmCustomer.note ?? noneLabel}</div>
-      <div>${crmLabels.total}: ${payload.crmLead.estimate.total} ${payload.crmLead.estimate.currency}</div>
+      <div>${crmLabels.total}: ${formatNumber(payload.crmLead.estimate.total)} ${payload.crmLead.estimate.currency}</div>
       <div>${crmLabels.delivery}: ${deliveryStatus}</div>
     `;
   } catch (error) {
