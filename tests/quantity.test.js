@@ -48,3 +48,39 @@ test("quantity resolver extracts type-specific pcs quantities", () => {
     { category: "electrical", type: "light_install", quantity: 2 },
   ]);
 });
+
+test("quantity resolver infers linear meter values for linear services", () => {
+  const result = resolveWorkQuantities({
+    works: [{ category: "painting", type: "acrylic_corners", quantity: 1 }],
+    unresolvedQuantity: [],
+    message: "Acrylic corners 12 m/p",
+  });
+
+  assert.deepEqual(result.works, [
+    { category: "painting", type: "acrylic_corners", quantity: 12 },
+  ]);
+});
+
+test("quantity resolver infers rib values for radiator painting", () => {
+  const result = resolveWorkQuantities({
+    works: [{ category: "painting", type: "radiator_paint", quantity: 1 }],
+    unresolvedQuantity: [],
+    message: "Paint radiator 14 ribs",
+  });
+
+  assert.deepEqual(result.works, [
+    { category: "painting", type: "radiator_paint", quantity: 14 },
+  ]);
+});
+
+test("quantity resolver infers module values for switchboards", () => {
+  const result = resolveWorkQuantities({
+    works: [{ category: "electrical", type: "switchboard_install", quantity: 1 }],
+    unresolvedQuantity: [],
+    message: "Switchboard 24 modules",
+  });
+
+  assert.deepEqual(result.works, [
+    { category: "electrical", type: "switchboard_install", quantity: 24 },
+  ]);
+});

@@ -1,20 +1,37 @@
 import { pricing } from "../config/pricing.js";
 
-const AREA_REGEX = /\b(\d+(?:[.,]\d+)?)\s*(m2|m\^2|sqm|m²)\b/giu;
+const AREA_REGEX =
+  /\b(\d+(?:[.,]\d+)?)\s*(?:m2|m\^2|sqm|sq\.?\s*m|m²|кв\.?\s*м|квм)\b/giu;
+const LINEAR_REGEX =
+  /\b(\d+(?:[.,]\d+)?)\s*(?:lm|mb|m\/b|m\/p|m\.p\.?|mb\.?|м\/п|м\.п\.?|мп|linear\s*m(?:eters?)?|running\s*m(?:eters?)?)\b/giu;
 const PCS_REGEX =
-  /\b(\d+(?:[.,]\d+)?)\s*(pcs|pc|pieces?|szt|шт|points?|punkty|punktow)\b/giu;
+  /\b(\d+(?:[.,]\d+)?)\s*(?:pcs|pc|pieces?|szt|шт|points?|punkty|punktow|point)\b/giu;
+const RIB_REGEX =
+  /\b(\d+(?:[.,]\d+)?)\s*(?:ribs?|rib|zeber|żeb(?:ro|ra|er)?|реб(?:ро|ра|ер)?)\b/giu;
+const MODULE_REGEX =
+  /\b(\d+(?:[.,]\d+)?)\s*(?:modules?|module|modu(?:l|ly|ł|ły)|модул(?:ь|я|ей)?)\b/giu;
 
 const TYPE_PATTERNS = Object.freeze({
   socket_install:
-    /\b(\d+(?:[.,]\d+)?)\s*(socket|sockets|gniazdo|gniazda|gniazd|gniazdek)\b/i,
-  light_install: /\b(\d+(?:[.,]\d+)?)\s*(light|lights|lamp|lamps|opraw)\b/i,
+    /\b(\d+(?:[.,]\d+)?)\s*(?:socket|sockets|switch|switches|gniazdo|gniazda|gniazd|gniazdek|włącznik|wlacznik|wylacznik|розет|выключател)/i,
+  light_install:
+    /\b(\d+(?:[.,]\d+)?)\s*(?:light|lights|lamp|lamps|opraw|lampa|ламп|светильник)/i,
   electric_point:
-    /\b(\d+(?:[.,]\d+)?)\s*(electric\s*points?|punkty?\s*elektrycz)\b/i,
-  water_point: /\b(\d+(?:[.,]\d+)?)\s*(water\s*points?|punkty?\s*wodn)\b/i,
+    /\b(\d+(?:[.,]\d+)?)\s*(?:electric\s*points?|punkty?\s*elektrycz|точ(?:ка|ки)\s*электр)/i,
+  water_point:
+    /\b(\d+(?:[.,]\d+)?)\s*(?:water\s*points?|punkty?\s*wodn|точ(?:ка|ки)\s*вод)/i,
   heating_point:
-    /\b(\d+(?:[.,]\d+)?)\s*(heating\s*points?|punkty?\s*grzew)\b/i,
-  toilet_install: /\b(\d+(?:[.,]\d+)?)\s*(toilet|toilets|wc|sedes)\b/i,
-  shower_install: /\b(\d+(?:[.,]\d+)?)\s*(shower|showers|prysznic|kabin)\b/i,
+    /\b(\d+(?:[.,]\d+)?)\s*(?:heating\s*points?|punkty?\s*grzew|точ(?:ка|ки)\s*отоплен)/i,
+  toilet_install:
+    /\b(\d+(?:[.,]\d+)?)\s*(?:toilet|toilets|wc|sedes|bidet|bidets|umywalka|umywalki|унитаз|биде|умывальник)/i,
+  shower_install:
+    /\b(\d+(?:[.,]\d+)?)\s*(?:shower|showers|prysznic|kabin|душ(?:евая)?\s*кабин)/i,
+  door_paint: /\b(\d+(?:[.,]\d+)?)\s*(?:door|doors|drzwi|двер)/i,
+  radiator_paint: /\b(\d+(?:[.,]\d+)?)\s*(?:ribs?|zeber|реб)/i,
+  radiator_install:
+    /\b(\d+(?:[.,]\d+)?)\s*(?:radiator|radiators|grzejnik|grzejniki|радиатор)/i,
+  switchboard_install:
+    /\b(\d+(?:[.,]\d+)?)\s*(?:modules?|module|modu(?:l|ly|ł|ły)|модул)/i,
 });
 
 function parseNumber(rawValue) {
@@ -92,7 +109,15 @@ function inferFromTypePattern(message, workType) {
   return parseNumber(match[1]);
 }
 
-function inferQuantityForWork({ message, work, areaValue, piecesValue }) {
+function inferQuantityForWork({
+  message,
+  work,
+  areaValue,
+  piecesValue,
+  linearValue,
+  ribValue,
+  moduleValue,
+}) {
   const unit = getWorkUnit(work);
   const patternValue = inferFromTypePattern(message, work.type);
 
@@ -104,8 +129,20 @@ function inferQuantityForWork({ message, work, areaValue, piecesValue }) {
     return areaValue;
   }
 
+  if (unit === "lm") {
+    return linearValue;
+  }
+
   if (unit === "pcs") {
     return piecesValue;
+  }
+
+  if (unit === "rib") {
+    return ribValue;
+  }
+
+  if (unit === "module") {
+    return moduleValue;
   }
 
   return null;
@@ -117,9 +154,16 @@ export function resolveWorkQuantities({ works, unresolvedQuantity, message }) {
   const unresolved = Array.isArray(unresolvedQuantity) ? unresolvedQuantity : [];
 
   const areaValues = extractNumbers(normalizedMessage, AREA_REGEX);
+  const linearValues = extractNumbers(normalizedMessage, LINEAR_REGEX);
   const piecesValues = extractNumbers(normalizedMessage, PCS_REGEX);
+  const ribValues = extractNumbers(normalizedMessage, RIB_REGEX);
+  const moduleValues = extractNumbers(normalizedMessage, MODULE_REGEX);
+
   const areaValue = singleStableValue(areaValues);
+  const linearValue = singleStableValue(linearValues);
   const piecesValue = singleStableValue(piecesValues);
+  const ribValue = singleStableValue(ribValues);
+  const moduleValue = singleStableValue(moduleValues);
 
   const warnings = [];
   const resolved = [];
@@ -131,6 +175,9 @@ export function resolveWorkQuantities({ works, unresolvedQuantity, message }) {
       work,
       areaValue,
       piecesValue,
+      linearValue,
+      ribValue,
+      moduleValue,
     });
 
     if (quantity === 1 && inferred && inferred > 1) {
@@ -149,6 +196,9 @@ export function resolveWorkQuantities({ works, unresolvedQuantity, message }) {
       work,
       areaValue,
       piecesValue,
+      linearValue,
+      ribValue,
+      moduleValue,
     });
 
     if (!inferred) {
@@ -172,9 +222,27 @@ export function resolveWorkQuantities({ works, unresolvedQuantity, message }) {
     );
   }
 
+  if (!linearValue && linearValues.length > 1) {
+    warnings.push(
+      `Multiple linear values detected (${linearValues.join(", ")}). Quantity auto-fill was limited.`,
+    );
+  }
+
   if (!piecesValue && piecesValues.length > 1) {
     warnings.push(
       `Multiple piece values detected (${piecesValues.join(", ")}). Quantity auto-fill was limited.`,
+    );
+  }
+
+  if (!ribValue && ribValues.length > 1) {
+    warnings.push(
+      `Multiple rib values detected (${ribValues.join(", ")}). Quantity auto-fill was limited.`,
+    );
+  }
+
+  if (!moduleValue && moduleValues.length > 1) {
+    warnings.push(
+      `Multiple module values detected (${moduleValues.join(", ")}). Quantity auto-fill was limited.`,
     );
   }
 
@@ -183,9 +251,15 @@ export function resolveWorkQuantities({ works, unresolvedQuantity, message }) {
     warnings,
     quantityHints: {
       areaValues,
+      linearValues,
       piecesValues,
+      ribValues,
+      moduleValues,
       areaValue,
+      linearValue,
       piecesValue,
+      ribValue,
+      moduleValue,
     },
   };
 }
