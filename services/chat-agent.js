@@ -1,5 +1,6 @@
 ﻿import { buildClarifyingQuestions, detectMissingFields } from "../engine/clarifier.js";
 import { calculateProject } from "../engine/calculator.js";
+import { pruneImplicitWorks } from "../engine/extraction-scope.js";
 import { detectChatLanguage, normalizeChatLanguage } from "../engine/language.js";
 import { normalizeWorks } from "../engine/normalizer.js";
 import { resolveWorkQuantities } from "../engine/quantity.js";
@@ -560,8 +561,12 @@ export function createChatAgent({ extractWorks, composeAssistantMessage = null }
         unresolvedQuantity: normalized.unresolvedQuantity,
         message: cleanedMessage,
       });
+      const scopePruned = pruneImplicitWorks({
+        works: quantityResolved.works,
+        message: cleanedMessage,
+      });
 
-      const works = mergeWorkLists(safeSession.works, quantityResolved.works);
+      const works = mergeWorkLists(safeSession.works, scopePruned.works);
       const userMessages = [...safeSession.userMessages, cleanedMessage];
       const conversationText = userMessages.join("\n");
       const estimate = calculateProject(works);
@@ -576,6 +581,7 @@ export function createChatAgent({ extractWorks, composeAssistantMessage = null }
         ...extraction.warnings,
         ...normalized.warnings,
         ...quantityResolved.warnings,
+        ...scopePruned.warnings,
         ...estimate.warnings,
       ]);
 
@@ -588,7 +594,7 @@ export function createChatAgent({ extractWorks, composeAssistantMessage = null }
         !hasProjectSignals(cleanedMessage);
       const offTopic = isLikelyOffTopicMessage({
         message: cleanedMessage,
-        extractedWorks: quantityResolved.works,
+        extractedWorks: scopePruned.works,
       });
 
       const assistantMessage = await buildAssistantMessage({

@@ -14,8 +14,9 @@ export function buildExtractionPrompt() {
     "",
     "Rules:",
     "- quantity must be a positive number",
-    "- if the user provides one area (for example 18m2), reuse it for all m2 works",
+    "- if the user provides one area (for example 18m2), reuse it only for works explicitly mentioned in the message",
     "- do not default quantity to 1 when explicit area/count is present in the message",
+    '- a generic painting request like "malowanie 20 m2" means only painting work (paint_2_layers), not preparation, putty, priming, project design or other related works unless they are explicitly mentioned',
     "- if you are not sure about a work item, skip it",
     "- never invent category/type names outside the catalog",
   ].join("\n");
