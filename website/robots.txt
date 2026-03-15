@@ -1,0 +1,6 @@
+﻿User-agent: *
+Allow: /
+Disallow: /tests/
+Disallow: /package.json
+
+Sitemap: https://pomorskie-malowania.pl/sitemap.xml
